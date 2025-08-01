@@ -1,0 +1,97 @@
+//
+//  .gitignore
+//  RecipeHubFrontEnd
+//
+//  Created by Esther Kang on 8/1/25.
+//
+
+# Xcode
+.DS_Store
+*.xcodeproj
+xcuserdata/
+build/
+DerivedData/
+.xcworkspace/
+!*.xcworkspace/contents.xcworkspacedata
+*.playground/
+*.playground/timeline.xctimeline
+*.playground/xcuserdata/
+
+# Swift Package Manager
+.swiftpm/
+Package.resolved
+
+# CocoaPods
+Pods/
+!Pods/.gitkeep
+
+# Carthage
+Carthage/
+
+# fastlane
+fastlane/report.xml
+fastlane/screenshots/
+fastlane/test_output/
+
+# User-specific settings
+*.bak
+*.log
+*.swp
+*.swo
+
+# Crashlytics
+Crashlytics/
+
+# Other temporary or generated files
+*.o
+*.d
+*.gcno
+*.gch
+*.pch
+*.xccheckout
+*.xcscmblueprint
+*.xctestplan
+*.ipa
+*.zip
+*.dmg
+*.app
+*.dSYM
+*.framework
+*.a
+*.dylib
+*.so
+*.mobileprovision
+*.pem
+*.p12
+*.keychain
+*.csr
+*.cer
+*.pvr
+*.pvrtc
+*.ktx
+*.fsh
+*.vsh
+*.glsl
+*.metal
+*.mtllib
+*.obj
+*.scn
+*.dae
+*.sks
+*.atlas
+*.spriteatlas
+*.xcassets/
+!*.xcassets/Contents.json
+*.storyboardc/
+*.xib/
+*.nib/
+*.strings/
+*.stringsdict/
+*.plist/
+*.entitlements/
+*.modulemap/
+
+# Sensitive information (e.g., API keys, credentials)
+# Add specific files containing sensitive data here, e.g.:
+# Secrets.swift
+# config.json
