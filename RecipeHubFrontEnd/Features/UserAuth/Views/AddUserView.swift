@@ -9,6 +9,7 @@ import SwiftUI
 
 struct AddUserView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    let onBack: () -> Void
     @State private var username = ""
     @State private var email = ""
     @State private var password = ""
@@ -17,6 +18,14 @@ struct AddUserView: View {
         ZStack{
             Color(red: 1.0, green: 0.95, blue: 0.97).ignoresSafeArea()
             VStack(spacing: 24) {
+                HStack {
+                    Button("Back") {
+                        onBack()
+                    }
+                    .foregroundColor(.gray)
+                    Spacer()
+                }
+                
                 Text("Join RecipeHub")
                     .font(.title)
                     .fontWeight(.bold)
@@ -40,7 +49,12 @@ struct AddUserView: View {
                     }
                 
                 Button("Create Account") {
+                    print("Create Account button tapped")
+                    print("Username: \(authViewModel.username)")
+                    print("Email: \(authViewModel.email)")
+                    print("Password: \(authViewModel.password)")
                     authViewModel.addUser {
+                        print("Add user completion handler called")
                         // Navigation is handled automatically by RootView
                         // when isLoggedIn becomes true
                     }
@@ -60,7 +74,7 @@ struct AddUserView: View {
 
 struct AddUserScreen_Previews: PreviewProvider {
     static var previews: some View {
-        AddUserView()
+        AddUserView(onBack: {})
             .environmentObject(AuthViewModel())
     }
 }

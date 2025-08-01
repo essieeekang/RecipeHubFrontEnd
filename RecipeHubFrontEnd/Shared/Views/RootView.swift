@@ -28,10 +28,17 @@ struct RootView: View {
         Group {
             if authViewModel.isLoggedIn {
                 MainTabView()
+                    .environmentObject(authViewModel)
             } else {
                 WelcomeView()
                     .environmentObject(authViewModel)
             }
+        }
+        .onChange(of: authViewModel.isLoggedIn) { _, newValue in
+            print("RootView: isLoggedIn changed to \(newValue)")
+        }
+        .onAppear {
+            print("RootView appeared, isLoggedIn: \(authViewModel.isLoggedIn)")
         }
     }
 }

@@ -8,7 +8,11 @@
 import Foundation
 
 class AuthViewModel: ObservableObject {
-    @Published var isLoggedIn = false
+    @Published var isLoggedIn = false {
+        didSet {
+            print("AuthViewModel: isLoggedIn changed from \(oldValue) to \(isLoggedIn)")
+        }
+    }
     @Published var username: String = ""
     @Published var email: String = ""
     @Published var password: String = ""
@@ -19,16 +23,25 @@ class AuthViewModel: ObservableObject {
             errorMessage = "Username and password cannot be empty"
             return
         }
+        
+        print("Attempting login with username: \(username)")
+        
         LoginAction(
             parameters: LoginRequest(
                 username: username,
                 password: password
             )
         ).call { response in
-            print("Welcome! Your new username is: ", response.body)
-            self.isLoggedIn = true
-            self.errorMessage = ""
-            handler()
+            print("LoginAction completion called with response: \(response)")
+            DispatchQueue.main.async {
+                print("Login successful! Welcome: \(response.body)")
+                print("Setting isLoggedIn to true")
+                self.isLoggedIn = true
+                print("isLoggedIn is now: \(self.isLoggedIn)")
+                self.errorMessage = ""
+                print("Calling login completion handler")
+                handler()
+            }
         }
     }
 
@@ -37,6 +50,9 @@ class AuthViewModel: ObservableObject {
             errorMessage = "All fields are required"
             return
         }
+        
+        print("Attempting to create user with username: \(username), email: \(email)")
+        
         AddUserAction(
             parameters: AddUserRequest(
                 username: username,
@@ -44,10 +60,15 @@ class AuthViewModel: ObservableObject {
                 password: password
             )
         ).call { response in
-            print("Welcome! Your new username is: ", response.username)
-            self.isLoggedIn = true
-            self.errorMessage = ""
-            handler()
+            print("AddUserAction completion called with response: \(response)")
+            DispatchQueue.main.async {
+                print("User creation successful! Welcome: \(response.username)")
+                print("Setting isLoggedIn to true")
+                self.isLoggedIn = true
+                self.errorMessage = ""
+                print("Calling addUser completion handler")
+                handler()
+            }
         }
     }
 

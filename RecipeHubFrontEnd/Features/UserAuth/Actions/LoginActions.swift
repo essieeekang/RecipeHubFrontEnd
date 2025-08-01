@@ -22,8 +22,11 @@ struct LoginAction {
         components.path = path
 
         guard let url = components.url else {
+            print("Failed to create URL")
             return
         }
+        
+        print("Making request to: \(url)")
 
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -33,8 +36,11 @@ struct LoginAction {
 
         do {
             request.httpBody = try JSONEncoder().encode(parameters)
+            if let bodyString = String(data: request.httpBody!, encoding: .utf8) {
+                print("Request body: \(bodyString)")
+            }
         } catch {
-            print("Encoding error")
+            print("Encoding error: \(error)")
             return
         }
 
@@ -47,7 +53,8 @@ struct LoginAction {
             if let httpResponse = response as? HTTPURLResponse {
                 print("Status code: \(httpResponse.statusCode)")
                 if httpResponse.statusCode != 200 {
-                    print("Login failed")
+                    print("Login failed with status code: \(httpResponse.statusCode)")
+                    return
                 } else {
                     print("Login successful")
                 }
@@ -60,12 +67,25 @@ struct LoginAction {
 
             do {
                 let response = try JSONDecoder().decode(LoginResponse.self, from: data)
+                print("Login successful, response: \(response)")
                 completion(response)
             } catch {
-                print("")
+                print("Decoding error: \(error)")
+                if let dataString = String(data: data, encoding: .utf8) {
+                    print("Raw response data: \(dataString)")
+                    // If the response is plain text "Login successful", create a response manually
+                    if dataString.trimmingCharacters(in: .whitespacesAndNewlines) == "Login successful" {
+                        let response = LoginResponse(body: dataString)
+                        print("Created response from plain text: \(response)")
+                        print("About to call completion handler")
+                        completion(response)
+                        print("Completion handler called")
+                    }
+                }
             }
         }
 
+        print("Starting network request...")
         task.resume()
     }
 }

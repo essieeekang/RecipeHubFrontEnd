@@ -9,6 +9,7 @@ import SwiftUI
 
 struct LoginView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    let onBack: () -> Void
     @State private var username = ""
     @State private var password = ""
 
@@ -16,6 +17,14 @@ struct LoginView: View {
         ZStack{
             Color(red: 1.0, green: 0.95, blue: 0.97).ignoresSafeArea()
             VStack(spacing: 24) {
+                HStack {
+                    Button("Back") {
+                        onBack()
+                    }
+                    .foregroundColor(.gray)
+                    Spacer()
+                }
+                
                 Text("Welcome Back")
                     .font(.title)
                     .fontWeight(.bold)
@@ -33,7 +42,11 @@ struct LoginView: View {
                     }
                 
                 Button("Log In") {
+                    print("Login button tapped")
+                    print("Username: \(authViewModel.username)")
+                    print("Password: \(authViewModel.password)")
                     authViewModel.login {
+                        print("Login completion handler called")
                         // Navigation is handled automatically by RootView
                         // when isLoggedIn becomes true
                     }
@@ -96,7 +109,7 @@ struct LoginView: View {
 
 struct LoginScreen_Previews: PreviewProvider {
     static var previews: some View {
-        LoginView()
+        LoginView(onBack: {})
             .environmentObject(AuthViewModel())
     }
 }
