@@ -10,11 +10,11 @@ import Foundation
 struct AddUserAction {
     var parameters: AddUserRequest
     func call(completion: @escaping (AddUserResponse) -> Void) {
-//        let scheme: String = "http"
-//        let host: String = "recipehub-dev-env.eba-6mi9w35s.us-east-2.elasticbeanstalk.com"
         let scheme: String = "http"
-        let host: String = "127.0.0.1"
-        let port: Int = 8080
+        let host: String = "recipehub-dev-env.eba-6mi9w35s.us-east-2.elasticbeanstalk.com"
+//        let scheme: String = "http"
+//        let host: String = "127.0.0.1"
+        let port: Int = 80
         let path = "/api/auth/register"
 
         var components = URLComponents()
