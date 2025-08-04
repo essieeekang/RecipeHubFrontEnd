@@ -11,7 +11,7 @@ struct LoginAction {
     var parameters: LoginRequest
     func call(completion: @escaping (LoginResponse) -> Void) {
         let scheme: String = "http"
-        let host: String = "127.0.0.1"
+        let host: String = "192.168.0.166"
         let port: Int = 8080
         let path = "/api/auth/login"
 

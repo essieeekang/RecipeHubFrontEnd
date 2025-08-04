@@ -12,7 +12,7 @@ class HomeViewModel: ObservableObject {
     @Published var recipes: [Recipe] = [
         Recipe(
             id: 1,
-            title: "Strawberry Shortcake",
+            title: "🍓 Strawberry Shortcake",
             description: "A sweet and fruity dessert.",
             ingredients: [
                 Ingredient(name: "Strawberries", unit: "cups", quantity: 2),
@@ -36,7 +36,7 @@ class HomeViewModel: ObservableObject {
         ),
         Recipe(
             id: 2,
-            title: "Matcha Pancakes",
+            title: "🍵 Matcha Pancakes",
             description: "Fluffy pancakes with a hint of green tea.",
             ingredients: [
                 Ingredient(name: "Matcha powder", unit: "tsp", quantity: 2),

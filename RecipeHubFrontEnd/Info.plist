@@ -15,6 +15,13 @@
 				<key>Include Subdomains</key>
 				<true/>
 			</dict>
+			<key>192.168.0.166</key>
+			<dict>
+				<key>Allows Insecure HTTP Loads</key>
+				<true/>
+				<key>Include Subdomains</key>
+				<true/>
+			</dict>
 			<key>recipehub-dev-env.eba-6mi9w35s.us-east-2.elasticbeanstalk.com</key>
 			<dict>
 				<key>Allows Insecure HTTP Loads</key>

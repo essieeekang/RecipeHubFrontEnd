@@ -36,7 +36,7 @@ struct RecipeDetailView: View {
                             .fontWeight(.semibold)
                         
                         ForEach(viewModel.recipe.ingredients, id: \.name) { ingredient in
-                            Text("- \(ingredient.quantity) \(ingredient.unit) \(ingredient.name)")
+                            Text("- \(ingredient.quantity.clean) \(ingredient.unit) \(ingredient.name)")
                         }
                     }
                     

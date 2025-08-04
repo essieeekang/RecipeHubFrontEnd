@@ -30,7 +30,7 @@ struct Recipe: Decodable, Identifiable {
     static let sample =
         Recipe(
             id: 1,
-            title: "Strawberry Shortcake",
+            title: "🍓 Strawberry Shortcake",
             description: "A sweet and fruity dessert.",
             ingredients: [
                 Ingredient(name: "Strawberries", unit: "cups", quantity: 2),

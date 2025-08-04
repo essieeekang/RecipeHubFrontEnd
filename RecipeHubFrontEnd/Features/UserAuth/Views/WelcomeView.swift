@@ -53,7 +53,7 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 40) {
-                Text("🍳 RecipeHub")
+                Text("RecipeHub")
                     .font(.system(size: 40, weight: .bold))
                     .foregroundColor(.purple)
 

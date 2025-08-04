@@ -21,7 +21,7 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Header
                     HStack {
-                        Text("🍓 My Recipes")
+                        Text("My Recipes")
                             .font(.largeTitle)
                             .fontWeight(.bold)
                             .foregroundColor(.purple)
@@ -38,8 +38,11 @@ struct HomeView: View {
                     ScrollView {
                         LazyVStack(spacing: 16) {
                             ForEach(viewModel.recipes) { recipe in
-                                RecipeCardView(recipe: recipe)
-                                    .padding(.horizontal)
+                                NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
+                                    RecipeCardView(recipe: recipe)
+                                }
+                                .buttonStyle(PlainButtonStyle())
+                                .padding(.horizontal)
                             }
                         }
                         .padding(.vertical)

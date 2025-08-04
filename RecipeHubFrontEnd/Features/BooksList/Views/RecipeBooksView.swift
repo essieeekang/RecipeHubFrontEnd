@@ -10,7 +10,7 @@ import SwiftUI
 struct RecipeBooksView: View {
     var body: some View {
         NavigationView {
-            Text("📚 Your Recipe Books")
+            Text("Your Recipe Books")
                 .font(.title)
                 .navigationTitle("My Books")
         }

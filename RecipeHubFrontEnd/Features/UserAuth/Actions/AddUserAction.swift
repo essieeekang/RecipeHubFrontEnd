@@ -54,9 +54,11 @@ struct AddUserAction {
 
             if let httpResponse = response as? HTTPURLResponse {
                 print("Status code: \(httpResponse.statusCode)")
-                if httpResponse.statusCode != 200 {
+                if httpResponse.statusCode != 201 {
                     print("User creation failed with status code: \(httpResponse.statusCode)")
                     return
+                } else {
+                    print("User creation successful")
                 }
             }
 

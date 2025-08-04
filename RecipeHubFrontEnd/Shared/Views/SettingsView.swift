@@ -13,7 +13,7 @@ struct SettingsView: View {
     var body: some View {
         NavigationView {
             VStack(spacing: 20) {
-                Text("⚙️ Settings")
+                Text("Settings")
                     .font(.title)
                     .foregroundColor(.purple)
                 

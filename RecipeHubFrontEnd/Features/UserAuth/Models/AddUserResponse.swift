@@ -11,6 +11,5 @@ struct AddUserResponse: Identifiable, Decodable {
     let id: Int
     let username: String
     let email: String
-    let password: String
     let createdAt: String
 }

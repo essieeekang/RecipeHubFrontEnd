@@ -12,26 +12,47 @@ struct RecipeCardView: View {
     let recipe: Recipe
     
     var body: some View {
-        HStack(spacing: 16) {
-            ZStack {
+        HStack {
+            VStack(alignment: .leading, spacing: 8) {
+                Text(recipe.title)
+                    .font(.headline)
+                    .foregroundColor(.primary)
+                
+                Text(recipe.description)
+                    .font(.subheadline)
+                    .foregroundColor(.gray)
+                    .lineLimit(2)
+                
                 HStack {
-                    VStack(alignment: .leading) {
-                        Text(recipe.title)
-                            .font(.headline)
-                        Text(recipe.description)
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                    }
+                    Text("by \(recipe.authorUsername)")
+                        .font(.caption)
+                        .foregroundColor(.purple)
                     
                     Spacer()
-                    Image(systemName: "chevron.right")
-                        .foregroundColor(.gray)
+                    
+                    if recipe.favourite {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.caption)
+                    }
+                    
+                    if recipe.cooked {
+                        Image(systemName: "checkmark.circle.fill")
+                            .foregroundColor(.green)
+                            .font(.caption)
+                    }
                 }
-                .padding()
-                .background(Color.white)
-                .cornerRadius(20)
-                .shadow(color: Color.black.opacity(0.05), radius: 5, x: 0, y: 5)
             }
+            
+            Spacer()
+            
+            Image(systemName: "chevron.right")
+                .foregroundColor(.gray)
+                .font(.caption)
         }
+        .padding()
+        .background(Color.white)
+        .cornerRadius(16)
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 }
