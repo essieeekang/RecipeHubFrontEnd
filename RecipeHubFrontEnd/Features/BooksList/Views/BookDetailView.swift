@@ -1,0 +1,194 @@
+//
+//  BookDetailView.swift
+//  RecipeHubFrontEnd
+//
+//  Created by Esther Kang on 7/31/25.
+//
+
+import SwiftUI
+
+struct BookDetailView: View {
+    let book: RecipeBook
+    @StateObject private var viewModel = RecipeBooksViewModel()
+    @State private var showingAddRecipe = false
+    
+    var body: some View {
+        ZStack {
+            Color(red: 1.0, green: 0.95, blue: 0.97)
+                .ignoresSafeArea()
+            
+            ScrollView {
+                VStack(spacing: 20) {
+                    // Book Header
+                    VStack(spacing: 12) {
+                        HStack {
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text(book.displayName)
+                                    .font(.largeTitle)
+                                    .fontWeight(.bold)
+                                    .foregroundColor(.purple)
+                                
+                                Text("by \(book.authorUsername)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            Spacer()
+                            
+                            // Privacy indicator
+                            HStack(spacing: 4) {
+                                Image(systemName: book.isPublic ? "globe" : "lock")
+                                    .foregroundColor(book.isPublic ? .green : .orange)
+                                Text(book.isPublic ? "Public" : "Private")
+                                    .font(.caption)
+                                    .foregroundColor(book.isPublic ? .green : .orange)
+                            }
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.white)
+                            .cornerRadius(20)
+                        }
+                        
+                        Text(book.description)
+                            .font(.body)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.leading)
+                        
+                        HStack {
+                            HStack(spacing: 4) {
+                                Image(systemName: "doc.text")
+                                    .foregroundColor(.purple)
+                                Text("\(book.recipeCount) recipe\(book.recipeCount == 1 ? "" : "s")")
+                                    .font(.subheadline)
+                                    .foregroundColor(.purple)
+                            }
+                            
+                            Spacer()
+                            
+                            Text("Updated \(formatDate(book.updatedAt))")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(16)
+                    .shadow(color: .black.opacity(0.05), radius: 4, x: 0, y: 2)
+                    
+                    // Recipes Section
+                    VStack(spacing: 16) {
+                        HStack {
+                            Text("Recipes")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                                .foregroundColor(.purple)
+                            
+                            Spacer()
+                            
+                            Button(action: { showingAddRecipe = true }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .foregroundColor(.purple)
+                                    .font(.title2)
+                            }
+                        }
+                        
+                        if book.recipes.isEmpty {
+                            VStack(spacing: 12) {
+                                Image(systemName: "doc.text")
+                                    .font(.system(size: 48))
+                                    .foregroundColor(.gray)
+                                
+                                Text("No recipes yet")
+                                    .font(.headline)
+                                    .foregroundColor(.gray)
+                                
+                                Text("Add your first recipe to this book")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                    .multilineTextAlignment(.center)
+                            }
+                            .padding(40)
+                            .background(Color.white)
+                            .cornerRadius(16)
+                        } else {
+                            LazyVStack(spacing: 12) {
+                                ForEach(book.recipes) { recipe in
+                                    NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
+                                        RecipeCardView(recipe: recipe)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                        }
+                    }
+                }
+                .padding()
+            }
+        }
+        .navigationTitle("Book Details")
+        .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingAddRecipe) {
+            AddRecipeToBookView(book: book, viewModel: viewModel)
+        }
+    }
+    
+    private func formatDate(_ date: Date) -> String {
+        let formatter = RelativeDateTimeFormatter()
+        formatter.unitsStyle = .abbreviated
+        return formatter.localizedString(for: date, relativeTo: Date())
+    }
+}
+
+struct AddRecipeToBookView: View {
+    let book: RecipeBook
+    @ObservedObject var viewModel: RecipeBooksViewModel
+    @Environment(\.dismiss) private var dismiss
+    
+    // Sample recipes to choose from (in real app, this would be user's recipes)
+    private let availableRecipes = [Recipe.sample]
+    
+    var body: some View {
+        NavigationView {
+            ZStack {
+                Color(red: 1.0, green: 0.95, blue: 0.97)
+                    .ignoresSafeArea()
+                
+                ScrollView {
+                    VStack(spacing: 16) {
+                        Text("Add Recipe to '\(book.displayName)'")
+                            .font(.headline)
+                            .foregroundColor(.purple)
+                            .padding(.top)
+                        
+                        ForEach(availableRecipes) { recipe in
+                            Button(action: {
+                                viewModel.addRecipeToBook(recipe, bookId: book.id)
+                                dismiss()
+                            }) {
+                                RecipeCardView(recipe: recipe)
+                            }
+                            .buttonStyle(PlainButtonStyle())
+                        }
+                    }
+                    .padding()
+                }
+            }
+            .navigationTitle("Add Recipe")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                    .foregroundColor(.purple)
+                }
+            }
+        }
+    }
+}
+
+#Preview {
+    NavigationView {
+        BookDetailView(book: RecipeBook.sample)
+    }
+} 

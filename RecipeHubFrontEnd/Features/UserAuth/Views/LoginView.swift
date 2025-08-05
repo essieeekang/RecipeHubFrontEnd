@@ -31,12 +31,14 @@ struct LoginView: View {
                 
                 TextField("Username", text: $username)
                     .textFieldStyle(RoundedField())
+                    .textInputAutocapitalization(.never)
                     .onChange(of: username) { _, newValue in
                         authViewModel.username = newValue
                     }
                 
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedField())
+                    .textInputAutocapitalization(.never)
                     .onChange(of: password) { _, newValue in
                         authViewModel.password = newValue
                     }

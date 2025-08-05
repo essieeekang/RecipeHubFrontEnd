@@ -32,18 +32,21 @@ struct AddUserView: View {
                 
                 TextField("Username", text: $username)
                     .textFieldStyle(RoundedField())
+                    .textInputAutocapitalization(.never)
                     .onChange(of: username) { _, newValue in
                         authViewModel.username = newValue
                     }
                 
                 TextField("Email", text: $email)
                     .textFieldStyle(RoundedField())
+                    .textInputAutocapitalization(.never)
                     .onChange(of: email) { _, newValue in
                         authViewModel.email = newValue
                     }
                 
                 SecureField("Password", text: $password)
                     .textFieldStyle(RoundedField())
+                    .textInputAutocapitalization(.never)
                     .onChange(of: password) { _, newValue in
                         authViewModel.password = newValue
                     }
