@@ -28,7 +28,7 @@ struct BookDetailView: View {
                                     .fontWeight(.bold)
                                     .foregroundColor(.purple)
                                 
-                                Text("by \(book.authorUsername)")
+                                Text("Recipe Collection")
                                     .font(.subheadline)
                                     .foregroundColor(.gray)
                             }
@@ -64,10 +64,6 @@ struct BookDetailView: View {
                             }
                             
                             Spacer()
-                            
-                            Text("Updated \(formatDate(book.updatedAt))")
-                                .font(.caption)
-                                .foregroundColor(.gray)
                         }
                     }
                     .padding()
@@ -92,7 +88,7 @@ struct BookDetailView: View {
                             }
                         }
                         
-                        if book.recipes.isEmpty {
+                        if book.recipeIds.isEmpty {
                             VStack(spacing: 12) {
                                 Image(systemName: "doc.text")
                                     .font(.system(size: 48))
@@ -111,12 +107,24 @@ struct BookDetailView: View {
                             .background(Color.white)
                             .cornerRadius(16)
                         } else {
-                            LazyVStack(spacing: 12) {
-                                ForEach(book.recipes) { recipe in
-                                    NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
-                                        RecipeCardView(recipe: recipe)
+                            VStack(spacing: 12) {
+                                ForEach(book.recipeIds, id: \.self) { recipeId in
+                                    // TODO: Fetch recipe details by ID
+                                    // For now, show a placeholder
+                                    HStack {
+                                        Text("Recipe #\(recipeId)")
+                                            .font(.subheadline)
+                                            .foregroundColor(.secondary)
+                                        
+                                        Spacer()
+                                        
+                                        Image(systemName: "chevron.right")
+                                            .foregroundColor(.gray)
+                                            .font(.caption)
                                     }
-                                    .buttonStyle(PlainButtonStyle())
+                                    .padding()
+                                    .background(Color.white)
+                                    .cornerRadius(12)
                                 }
                             }
                         }
@@ -130,12 +138,6 @@ struct BookDetailView: View {
         .sheet(isPresented: $showingAddRecipe) {
             AddRecipeToBookView(book: book, viewModel: viewModel)
         }
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: date, relativeTo: Date())
     }
 }
 

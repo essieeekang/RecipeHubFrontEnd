@@ -12,17 +12,16 @@ struct RecipeBookCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Header with name and privacy indicator
+            // Book name and privacy indicator
             HStack {
                 Text(book.displayName)
-                    .font(.headline)
+                    .font(.title3)
                     .fontWeight(.semibold)
                     .foregroundColor(.primary)
                     .lineLimit(1)
                 
                 Spacer()
                 
-                // Privacy indicator
                 HStack(spacing: 4) {
                     Image(systemName: book.isPublic ? "globe" : "lock")
                         .font(.caption)
@@ -37,50 +36,33 @@ struct RecipeBookCardView: View {
             // Description
             Text(book.description)
                 .font(.subheadline)
-                .foregroundColor(.gray)
+                .foregroundColor(.secondary)
                 .lineLimit(2)
             
-            // Recipe count and author info
-            HStack {
-                HStack(spacing: 4) {
-                    Image(systemName: "doc.text")
-                        .font(.caption)
-                        .foregroundColor(.purple)
-                    
-                    Text("\(book.recipeCount) recipe\(book.recipeCount == 1 ? "" : "s")")
-                        .font(.caption)
-                        .foregroundColor(.purple)
-                }
-                
-                Spacer()
-                
-                Text("by \(book.authorUsername)")
+            // Recipe count
+            HStack(spacing: 4) {
+                Image(systemName: "doc.text")
                     .font(.caption)
-                    .foregroundColor(.gray)
+                    .foregroundColor(.purple)
+                
+                Text("\(book.recipeCount) recipe\(book.recipeCount == 1 ? "" : "s")")
+                    .font(.caption)
+                    .foregroundColor(.secondary)
             }
             
-            // Last updated info
-            HStack {
-                Text("Updated \(formatDate(book.updatedAt))")
-                    .font(.caption2)
-                    .foregroundColor(.gray)
-                
-                Spacer()
-                
-                // Preview of recipes (if any)
-                if !book.recipes.isEmpty {
-                    HStack(spacing: 2) {
-                        ForEach(book.recipes.prefix(3), id: \.id) { recipe in
-                            Circle()
-                                .fill(Color.purple.opacity(0.3))
-                                .frame(width: 8, height: 8)
-                        }
-                        
-                        if book.recipes.count > 3 {
-                            Text("+\(book.recipes.count - 3)")
-                                .font(.caption2)
-                                .foregroundColor(.gray)
-                        }
+            // Recipe preview dots (if any recipes)
+            if !book.recipeIds.isEmpty {
+                HStack(spacing: 4) {
+                    ForEach(0..<min(3, book.recipeIds.count), id: \.self) { _ in
+                        Circle()
+                            .fill(Color.purple.opacity(0.3))
+                            .frame(width: 6, height: 6)
+                    }
+                    
+                    if book.recipeIds.count > 3 {
+                        Text("+\(book.recipeIds.count - 3)")
+                            .font(.caption2)
+                            .foregroundColor(.secondary)
                     }
                 }
             }
@@ -88,13 +70,7 @@ struct RecipeBookCardView: View {
         .padding()
         .background(Color.white)
         .cornerRadius(16)
-        .shadow(color: .black.opacity(0.1), radius: 8, x: 0, y: 4)
-    }
-    
-    private func formatDate(_ date: Date) -> String {
-        let formatter = RelativeDateTimeFormatter()
-        formatter.unitsStyle = .abbreviated
-        return formatter.localizedString(for: date, relativeTo: Date())
+        .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
     }
 }
 
