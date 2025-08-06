@@ -9,6 +9,7 @@ import SwiftUI
 
 struct CreateBookView: View {
     @ObservedObject var viewModel: RecipeBooksViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     
     @State private var name = ""
@@ -115,16 +116,17 @@ struct CreateBookView: View {
             return
         }
         
-        // TODO: Get current user info from AuthViewModel
-        let authorId = 1 // This should come from current user
-        let authorUsername = "currentuser" // This should come from current user
+        guard let currentUser = authViewModel.getCurrentUser() else {
+            errorMessage = "User not authenticated"
+            return
+        }
         
         viewModel.createBook(
             name: name,
             description: description,
             isPublic: isPublic,
-            authorId: authorId,
-            authorUsername: authorUsername
+            authorId: currentUser.id,
+            authorUsername: currentUser.username
         )
         
         dismiss()

@@ -8,55 +8,60 @@
 import Foundation
 
 class HomeViewModel: ObservableObject {
-    // Sample data for demonstration purposes
-    @Published var recipes: [Recipe] = [
-        Recipe(
-            id: 1,
-            title: "🍓 Strawberry Shortcake",
-            description: "A sweet and fruity dessert.",
-            ingredients: [
-                Ingredient(name: "Strawberries", unit: "cups", quantity: 2),
-                Ingredient(name: "Flour", unit: "cups", quantity: 1.5),
-                Ingredient(name: "Sugar", unit: "tbsp", quantity: 4)
-            ],
-            instructions: [
-                "Mix ingredients.",
-                "Bake at 350°F for 25 minutes.",
-                "Top with strawberries."
-            ],
-            isPublic: true,
-            cooked: false,
-            favourite: true,
-            likeCount: 128,
-            authorId: 1,
-            authorUsername: "bakerella",
-            originalRecipeId: 3,
-            createdAt: ISO8601DateFormatter().date(from: "2025-07-28T19:21:00.000Z") ?? Date(),
-            updatedAt: ISO8601DateFormatter().date(from: "2025-07-28T19:23:00.000Z") ?? Date()
-        ),
-        Recipe(
-            id: 2,
-            title: "🍵 Matcha Pancakes",
-            description: "Fluffy pancakes with a hint of green tea.",
-            ingredients: [
-                Ingredient(name: "Matcha powder", unit: "tsp", quantity: 2),
-                Ingredient(name: "Milk", unit: "cups", quantity: 1),
-                Ingredient(name: "Eggs", unit: "pieces", quantity: 2)
-            ],
-            instructions: [
-                "Whisk matcha with eggs and milk.",
-                "Add to pancake mix.",
-                "Cook on griddle until bubbles form."
-            ],
-            isPublic: false,
-            cooked: true,
-            favourite: true,
-            likeCount: 89,
-            authorId: 2,
-            authorUsername: "matcha_lover",
-            originalRecipeId: 4,
-            createdAt: ISO8601DateFormatter().date(from: "2025-07-28T19:21:00.000Z") ?? Date(),
-            updatedAt: ISO8601DateFormatter().date(from: "2025-07-28T19:23:00.000Z") ?? Date()
-        )
-    ]
+    @Published var recipes: [Recipe] = []
+    @Published var isLoading = false
+    @Published var errorMessage = ""
+    
+    init() {
+        // Start with empty recipes - will be loaded when user logs in
+        recipes = []
+    }
+    
+    func loadUserRecipes(userId: Int?) {
+        guard let userId = userId else {
+            print("No user ID available")
+            errorMessage = "User not authenticated"
+            return
+        }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        print("Loading recipes for user ID: \(userId)")
+        
+        GetUserRecipesAction(userId: userId).call { [weak self] recipes in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if recipes.isEmpty {
+                    self?.errorMessage = "No recipes found. Create your first recipe!"
+                    self?.recipes = []
+                } else {
+                    self?.recipes = recipes
+                    self?.errorMessage = ""
+                    print("Loaded \(recipes.count) recipes for user \(userId)")
+                }
+            }
+        }
+    }
+    
+    func refreshRecipes(userId: Int?) {
+        loadUserRecipes(userId: userId)
+    }
+    
+    func addRecipe(_ recipe: Recipe) {
+        recipes.append(recipe)
+    }
+    
+    func removeRecipe(at index: Int) {
+        if index < recipes.count {
+            recipes.remove(at: index)
+        }
+    }
+    
+    func updateRecipe(_ recipe: Recipe) {
+        if let index = recipes.firstIndex(where: { $0.id == recipe.id }) {
+            recipes[index] = recipe
+        }
+    }
 }

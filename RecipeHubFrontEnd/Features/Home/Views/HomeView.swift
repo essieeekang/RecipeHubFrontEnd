@@ -11,6 +11,7 @@ import SwiftUI
 
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
 
     var body: some View {
         NavigationView {
@@ -21,11 +22,21 @@ struct HomeView: View {
                 VStack(alignment: .leading, spacing: 20) {
                     // Header
                     HStack {
-                        Text("My Recipes")
-                            .font(.largeTitle)
-                            .fontWeight(.bold)
-                            .foregroundColor(.purple)
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("My Recipes")
+                                .font(.largeTitle)
+                                .fontWeight(.bold)
+                                .foregroundColor(.purple)
+                            
+                            if let username = authViewModel.getCurrentUsername() {
+                                Text("Welcome back, \(username)!")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        
                         Spacer()
+                        
                         NavigationLink(destination: SettingsView()) {
                             Image(systemName: "gearshape.fill")
                                 .font(.title2)
@@ -34,22 +45,65 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
 
-                    // Recipe List
-                    ScrollView {
-                        LazyVStack(spacing: 16) {
-                            ForEach(viewModel.recipes) { recipe in
-                                NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
-                                    RecipeCardView(recipe: recipe)
-                                }
-                                .buttonStyle(PlainButtonStyle())
-                                .padding(.horizontal)
+                    // Content
+                    if viewModel.isLoading {
+                        VStack(spacing: 16) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                            Text("Loading your recipes...")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else if !viewModel.errorMessage.isEmpty {
+                        VStack(spacing: 16) {
+                            Image(systemName: "doc.text")
+                                .font(.system(size: 48))
+                                .foregroundColor(.gray)
+                            
+                            Text(viewModel.errorMessage)
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.center)
+                            
+                            Button(action: {
+                                viewModel.refreshRecipes(userId: authViewModel.getCurrentUserId())
+                            }) {
+                                Text("Refresh")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .padding()
+                                    .background(Color.purple)
+                                    .cornerRadius(12)
                             }
                         }
-                        .padding(.vertical)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    } else {
+                        // Recipe List
+                        ScrollView {
+                            LazyVStack(spacing: 16) {
+                                ForEach(viewModel.recipes) { recipe in
+                                    NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
+                                        RecipeCardView(recipe: recipe)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                    .padding(.horizontal)
+                                }
+                            }
+                            .padding(.vertical)
+                        }
                     }
                 }
                 .navigationBarHidden(true)
             }
+        }
+        .onAppear {
+            // Load user-specific recipes when view appears
+            viewModel.loadUserRecipes(userId: authViewModel.getCurrentUserId())
+        }
+        .refreshable {
+            // Pull to refresh functionality
+            viewModel.refreshRecipes(userId: authViewModel.getCurrentUserId())
         }
     }
 }

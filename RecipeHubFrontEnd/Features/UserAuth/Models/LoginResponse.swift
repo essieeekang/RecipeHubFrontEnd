@@ -6,5 +6,8 @@
 //
 
 struct LoginResponse: Decodable {
-    let body: String
+    let message: String
+    let userId: Int
+    let username: String
+    let email: String
 }

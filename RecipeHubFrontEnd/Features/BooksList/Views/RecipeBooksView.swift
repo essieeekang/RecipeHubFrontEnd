@@ -9,6 +9,7 @@ import SwiftUI
 
 struct RecipeBooksView: View {
     @StateObject private var viewModel = RecipeBooksViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showingCreateBook = false
     
     var body: some View {
@@ -95,8 +96,7 @@ struct RecipeBooksView: View {
         }
         .onAppear {
             // Load user's books when view appears
-            // TODO: Pass actual user ID from AuthViewModel
-            viewModel.loadUserBooks(userId: 1)
+            viewModel.loadUserBooks(userId: authViewModel.getCurrentUserId())
         }
     }
 }

@@ -10,16 +10,18 @@ import Foundation
 struct LoginAction {
     var parameters: LoginRequest
     func call(completion: @escaping (LoginResponse) -> Void) {
+//        let scheme: String = "https"
+//        let host: String = "back-end-recipe-hub.onrender.com"
         let scheme: String = "http"
-        let host: String = "192.168.0.166"
+        let host: String = "127.0.0.1"
         let port: Int = 8080
         let path = "/api/auth/login"
 
         var components = URLComponents()
         components.scheme = scheme
         components.host = host
-        components.port = port
         components.path = path
+        components.port = port
 
         guard let url = components.url else {
             print("Failed to create URL")
@@ -73,14 +75,6 @@ struct LoginAction {
                 print("Decoding error: \(error)")
                 if let dataString = String(data: data, encoding: .utf8) {
                     print("Raw response data: \(dataString)")
-                    // If the response is plain text "Login successful", create a response manually
-                    if dataString.trimmingCharacters(in: .whitespacesAndNewlines) == "Login successful" {
-                        let response = LoginResponse(body: dataString)
-                        print("Created response from plain text: \(response)")
-                        print("About to call completion handler")
-                        completion(response)
-                        print("Completion handler called")
-                    }
                 }
             }
         }
