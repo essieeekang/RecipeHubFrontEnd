@@ -98,6 +98,14 @@ struct RecipeBooksView: View {
             // Load user's books when view appears
             viewModel.loadUserBooks(userId: authViewModel.getCurrentUserId())
         }
+        .onChange(of: viewModel.books.count) { _, newCount in
+            print("RecipeBooksView: Books count changed to \(newCount)")
+            print("Current books: \(viewModel.books.map { "\($0.name) (ID: \($0.id))" })")
+        }
+        .refreshable {
+            // Pull to refresh functionality
+            viewModel.refreshBooks(userId: authViewModel.getCurrentUserId())
+        }
     }
 }
 

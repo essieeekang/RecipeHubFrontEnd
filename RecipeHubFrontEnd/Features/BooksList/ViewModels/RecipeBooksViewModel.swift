@@ -51,11 +51,8 @@ class RecipeBooksViewModel: ObservableObject {
         loadUserBooks(userId: userId)
     }
     
-    func createBook(name: String, description: String, isPublic: Bool, authorId: Int, authorUsername: String) {
-        // TODO: Implement API call to create book
-        // For now, just add to local array
-        let newBook = RecipeBook(
-            id: books.count + 1,
+    func createBook(name: String, description: String, isPublic: Bool, authorId: Int, authorUsername: String, completion: @escaping (Bool) -> Void) {
+        let request = CreateRecipeBookRequest(
             name: name,
             description: description,
             isPublic: isPublic,
@@ -63,8 +60,25 @@ class RecipeBooksViewModel: ObservableObject {
             recipeIds: []
         )
         
-        DispatchQueue.main.async {
-            self.books.append(newBook)
+        print("Creating recipe book: \(name)")
+        
+        CreateRecipeBookAction(parameters: request).call { [weak self] recipeBook in
+            DispatchQueue.main.async {
+                if let newBook = recipeBook {
+                    print("Successfully created recipe book: \(newBook.name) with ID: \(newBook.id)")
+                    print("Current books count before adding: \(self?.books.count ?? 0)")
+                    
+                    self?.books.append(newBook)
+                    
+                    print("Current books count after adding: \(self?.books.count ?? 0)")
+                    print("Books in array: \(self?.books.map { "\($0.name) (ID: \($0.id))" } ?? [])")
+                    
+                    completion(true)
+                } else {
+                    print("Failed to create recipe book")
+                    completion(false)
+                }
+            }
         }
     }
     
