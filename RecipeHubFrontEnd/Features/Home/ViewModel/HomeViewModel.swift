@@ -50,7 +50,10 @@ class HomeViewModel: ObservableObject {
     }
     
     func addRecipe(_ recipe: Recipe) {
-        recipes.append(recipe)
+        DispatchQueue.main.async {
+            self.recipes.append(recipe)
+            print("Added new recipe to list: \(recipe.title)")
+        }
     }
     
     func removeRecipe(at index: Int) {

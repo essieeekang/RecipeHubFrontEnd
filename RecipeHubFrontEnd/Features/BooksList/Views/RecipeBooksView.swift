@@ -77,7 +77,7 @@ struct RecipeBooksView: View {
                         ScrollView {
                             LazyVStack(spacing: 16) {
                                 ForEach(viewModel.books) { book in
-                                    NavigationLink(destination: BookDetailView(book: book)) {
+                                    NavigationLink(destination: BookDetailView(book: book, viewModel: viewModel)) {
                                         RecipeBookCardView(book: book)
                                     }
                                     .buttonStyle(PlainButtonStyle())

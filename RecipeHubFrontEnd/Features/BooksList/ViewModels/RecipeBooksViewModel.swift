@@ -99,23 +99,88 @@ class RecipeBooksViewModel: ObservableObject {
     }
     
     func addRecipeToBook(_ recipe: Recipe, bookId: Int) {
-        // TODO: Implement API call to add recipe to book
-        DispatchQueue.main.async {
-            if let index = self.books.firstIndex(where: { $0.id == bookId }) {
-                var updatedBook = self.books[index]
-                // Note: This would need to be updated when we have the actual API
-                // For now, just update the local array
+        print("=== addRecipeToBook Debug ===")
+        print("Looking for book with ID: \(bookId)")
+        print("Current books in viewModel: \(books.map { "\($0.name) (ID: \($0.id))" })")
+        print("Total books count: \(books.count)")
+        
+        // Find the current book to get its existing data
+        guard let currentBook = books.first(where: { $0.id == bookId }) else {
+            print("❌ Book not found with ID: \(bookId)")
+            print("Available book IDs: \(books.map { $0.id })")
+            return
+        }
+        
+        print("✅ Found book: \(currentBook.name) (ID: \(currentBook.id))")
+        print("Current recipe IDs: \(currentBook.recipeIds)")
+        
+        // Create new recipe IDs array with the new recipe
+        var updatedRecipeIds = currentBook.recipeIds
+        if !updatedRecipeIds.contains(recipe.id) {
+            updatedRecipeIds.append(recipe.id)
+            print("➕ Adding recipe ID: \(recipe.id)")
+        } else {
+            print("⚠️ Recipe ID \(recipe.id) already exists in book")
+        }
+        
+        print("Updated recipe IDs: \(updatedRecipeIds)")
+        
+        let request = UpdateRecipeBookRequest(
+            name: nil, // Keep existing name
+            description: nil, // Keep existing description
+            isPublic: nil, // Keep existing privacy setting
+            recipeIds: updatedRecipeIds // Update with new recipe IDs
+        )
+        
+        UpdateRecipeBookAction(bookId: bookId, parameters: request).call { [weak self] updatedBook in
+            DispatchQueue.main.async {
+                if let newBook = updatedBook {
+                    // Update the local book data with the server response
+                    if let index = self?.books.firstIndex(where: { $0.id == bookId }) {
+                        self?.books[index] = newBook
+                        print("✅ Successfully updated recipe book: \(newBook.name) with \(newBook.recipeIds.count) recipes")
+                    } else {
+                        print("❌ Could not find book index for ID: \(bookId)")
+                    }
+                } else {
+                    print("❌ Failed to update recipe book")
+                }
             }
         }
     }
     
     func removeRecipeFromBook(_ recipe: Recipe, bookId: Int) {
-        // TODO: Implement API call to remove recipe from book
-        DispatchQueue.main.async {
-            if let index = self.books.firstIndex(where: { $0.id == bookId }) {
-                var updatedBook = self.books[index]
-                // Note: This would need to be updated when we have the actual API
-                // For now, just update the local array
+        // Find the current book to get its existing data
+        guard let currentBook = books.first(where: { $0.id == bookId }) else {
+            print("Book not found with ID: \(bookId)")
+            return
+        }
+        
+        // Create new recipe IDs array without the recipe
+        var updatedRecipeIds = currentBook.recipeIds
+        updatedRecipeIds.removeAll { $0 == recipe.id }
+        
+        print("Removing recipe \(recipe.title) (ID: \(recipe.id)) from book '\(currentBook.name)' (ID: \(bookId))")
+        print("Updated recipe IDs: \(updatedRecipeIds)")
+        
+        let request = UpdateRecipeBookRequest(
+            name: nil, // Keep existing name
+            description: nil, // Keep existing description
+            isPublic: nil, // Keep existing privacy setting
+            recipeIds: updatedRecipeIds // Update with recipe IDs minus the removed one
+        )
+        
+        UpdateRecipeBookAction(bookId: bookId, parameters: request).call { [weak self] updatedBook in
+            DispatchQueue.main.async {
+                if let newBook = updatedBook {
+                    // Update the local book data with the server response
+                    if let index = self?.books.firstIndex(where: { $0.id == bookId }) {
+                        self?.books[index] = newBook
+                        print("Successfully updated recipe book: \(newBook.name) with \(newBook.recipeIds.count) recipes")
+                    }
+                } else {
+                    print("Failed to update recipe book")
+                }
             }
         }
     }

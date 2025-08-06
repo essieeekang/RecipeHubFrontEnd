@@ -9,7 +9,13 @@ import SwiftUI
 
 struct AddRecipeView: View {
     @StateObject private var viewModel = AddRecipeViewModel()
+    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
+    let onRecipeCreated: ((Recipe) -> Void)?
+    
+    init(onRecipeCreated: ((Recipe) -> Void)? = nil) {
+        self.onRecipeCreated = onRecipeCreated
+    }
     
     var body: some View {
         NavigationView {
@@ -27,6 +33,7 @@ struct AddRecipeView: View {
                             
                             TextField("Enter recipe title", text: $viewModel.title)
                                 .textFieldStyle(RoundedField())
+                                .disabled(viewModel.isLoading)
                         }
                         
                         // Recipe Description
@@ -38,6 +45,7 @@ struct AddRecipeView: View {
                             TextField("Describe your recipe", text: $viewModel.description, axis: .vertical)
                                 .textFieldStyle(RoundedField())
                                 .lineLimit(3...6)
+                                .disabled(viewModel.isLoading)
                         }
                         
                         // Ingredients Section
@@ -54,6 +62,7 @@ struct AddRecipeView: View {
                                         .foregroundColor(.purple)
                                         .font(.title2)
                                 }
+                                .disabled(viewModel.isLoading)
                             }
                             
                             ForEach(Array(viewModel.ingredients.enumerated()), id: \.element.id) { index, ingredient in
@@ -61,7 +70,8 @@ struct AddRecipeView: View {
                                     ingredient: $viewModel.ingredients[index],
                                     onRemove: {
                                         viewModel.removeIngredient(at: index)
-                                    }
+                                    },
+                                    isDisabled: viewModel.isLoading
                                 )
                             }
                         }
@@ -80,6 +90,7 @@ struct AddRecipeView: View {
                                         .foregroundColor(.purple)
                                         .font(.title2)
                                 }
+                                .disabled(viewModel.isLoading)
                             }
                             
                             ForEach(Array(viewModel.instructions.enumerated()), id: \.offset) { index, instruction in
@@ -88,26 +99,30 @@ struct AddRecipeView: View {
                                     stepNumber: index + 1,
                                     onRemove: {
                                         viewModel.removeInstruction(at: index)
-                                    }
+                                    },
+                                    isDisabled: viewModel.isLoading
                                 )
                             }
                         }
                         
-                        // Privacy Setting
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Privacy")
+                        // Recipe Settings
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("Settings")
                                 .font(.headline)
                                 .foregroundColor(.purple)
                             
-                            HStack {
+                            VStack(spacing: 12) {
                                 Toggle("Make recipe public", isOn: $viewModel.isPublic)
                                     .toggleStyle(SwitchToggleStyle(tint: .purple))
+                                    .disabled(viewModel.isLoading)
                                 
-                                Spacer()
+                                Toggle("Mark as cooked", isOn: $viewModel.cooked)
+                                    .toggleStyle(SwitchToggleStyle(tint: .purple))
+                                    .disabled(viewModel.isLoading)
                                 
-                                Text(viewModel.isPublic ? "Public" : "Private")
-                                    .font(.caption)
-                                    .foregroundColor(.gray)
+                                Toggle("Add to favorites", isOn: $viewModel.favourite)
+                                    .toggleStyle(SwitchToggleStyle(tint: .purple))
+                                    .disabled(viewModel.isLoading)
                             }
                             .padding()
                             .background(Color.white)
@@ -125,24 +140,24 @@ struct AddRecipeView: View {
                         }
                         
                         // Create Recipe Button
-                        Button(action: viewModel.createRecipe) {
+                        Button(action: createRecipe) {
                             HStack {
                                 if viewModel.isLoading {
                                     ProgressView()
                                         .progressViewStyle(CircularProgressViewStyle(tint: .white))
                                         .scaleEffect(0.8)
-                                } else {
-                                    Text("Create Recipe")
-                                        .font(.headline)
                                 }
+                                
+                                Text(viewModel.isLoading ? "Creating..." : "Create Recipe")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
                             }
-                            .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
                             .background(viewModel.canSubmit ? Color.purple : Color.gray)
                             .cornerRadius(12)
                         }
-                        .disabled(!viewModel.canSubmit || viewModel.isLoading)
+                        .disabled(!viewModel.canSubmit)
                         .padding(.top)
                     }
                     .padding()
@@ -156,40 +171,61 @@ struct AddRecipeView: View {
                         dismiss()
                     }
                     .foregroundColor(.purple)
+                    .disabled(viewModel.isLoading)
                 }
             }
         }
         .alert("Recipe Created!", isPresented: $viewModel.isRecipeCreated) {
             Button("OK") {
-                viewModel.resetForm()
+                if let recipe = viewModel.createdRecipe {
+                    onRecipeCreated?(recipe)
+                }
                 dismiss()
             }
         } message: {
-            Text("Your recipe has been successfully created!")
+            Text("Your recipe has been successfully created and saved.")
+        }
+    }
+    
+    private func createRecipe() {
+        guard let currentUser = authViewModel.getCurrentUser() else {
+            viewModel.errorMessage = "User not authenticated"
+            return
+        }
+        
+        viewModel.createRecipe(authorId: currentUser.id) { success in
+            if success {
+                print("Recipe created successfully")
+            } else {
+                print("Failed to create recipe")
+            }
         }
     }
 }
 
 struct IngredientRowView: View {
-    @Binding var ingredient: AddRecipeViewModel.IngredientInput
+    @Binding var ingredient: IngredientInput
     let onRemove: () -> Void
+    let isDisabled: Bool
     
     var body: some View {
         HStack(spacing: 12) {
             // Quantity
-            TextField("Qty", text: $ingredient.quantity)
+            TextField("Qty", value: $ingredient.quantity, format: .number)
                 .textFieldStyle(RoundedField())
                 .frame(width: 80)
-                .keyboardType(.decimalPad)
+                .disabled(isDisabled)
             
             // Unit
             TextField("Unit", text: $ingredient.unit)
                 .textFieldStyle(RoundedField())
                 .frame(width: 100)
+                .disabled(isDisabled)
             
             // Name
             TextField("Ingredient name", text: $ingredient.name)
                 .textFieldStyle(RoundedField())
+                .disabled(isDisabled)
             
             // Remove button
             Button(action: onRemove) {
@@ -197,11 +233,8 @@ struct IngredientRowView: View {
                     .foregroundColor(.red)
                     .font(.title2)
             }
+            .disabled(isDisabled)
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 
@@ -209,12 +242,14 @@ struct InstructionRowView: View {
     @Binding var instruction: String
     let stepNumber: Int
     let onRemove: () -> Void
+    let isDisabled: Bool
     
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
             // Step number
             Text("\(stepNumber).")
-                .font(.headline)
+                .font(.subheadline)
+                .fontWeight(.semibold)
                 .foregroundColor(.purple)
                 .frame(width: 30, alignment: .leading)
             
@@ -222,6 +257,7 @@ struct InstructionRowView: View {
             TextField("Enter instruction step", text: $instruction, axis: .vertical)
                 .textFieldStyle(RoundedField())
                 .lineLimit(2...4)
+                .disabled(isDisabled)
             
             // Remove button
             Button(action: onRemove) {
@@ -229,14 +265,12 @@ struct InstructionRowView: View {
                     .foregroundColor(.red)
                     .font(.title2)
             }
+            .disabled(isDisabled)
         }
-        .padding()
-        .background(Color.white)
-        .cornerRadius(12)
-        .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
     }
 }
 
 #Preview {
     AddRecipeView()
+        .environmentObject(AuthViewModel())
 }

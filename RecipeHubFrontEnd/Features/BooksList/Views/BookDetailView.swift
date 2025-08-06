@@ -9,7 +9,7 @@ import SwiftUI
 
 struct BookDetailView: View {
     let book: RecipeBook
-    @StateObject private var viewModel = RecipeBooksViewModel()
+    @ObservedObject var viewModel: RecipeBooksViewModel
     @State private var showingAddRecipe = false
     
     var body: some View {
@@ -144,10 +144,9 @@ struct BookDetailView: View {
 struct AddRecipeToBookView: View {
     let book: RecipeBook
     @ObservedObject var viewModel: RecipeBooksViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
-    
-    // Sample recipes to choose from (in real app, this would be user's recipes)
-    private let availableRecipes = [Recipe.sample]
+    @StateObject private var homeViewModel = HomeViewModel()
     
     var body: some View {
         NavigationView {
@@ -155,24 +154,63 @@ struct AddRecipeToBookView: View {
                 Color(red: 1.0, green: 0.95, blue: 0.97)
                     .ignoresSafeArea()
                 
-                ScrollView {
+                if homeViewModel.isLoading {
                     VStack(spacing: 16) {
-                        Text("Add Recipe to '\(book.displayName)'")
-                            .font(.headline)
-                            .foregroundColor(.purple)
-                            .padding(.top)
-                        
-                        ForEach(availableRecipes) { recipe in
-                            Button(action: {
-                                viewModel.addRecipeToBook(recipe, bookId: book.id)
-                                dismiss()
-                            }) {
-                                RecipeCardView(recipe: recipe)
-                            }
-                            .buttonStyle(PlainButtonStyle())
-                        }
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                        Text("Loading your recipes...")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
                     }
-                    .padding()
+                } else if !homeViewModel.errorMessage.isEmpty {
+                    VStack(spacing: 16) {
+                        Image(systemName: "doc.text")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray)
+                        
+                        Text(homeViewModel.errorMessage)
+                            .font(.headline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                    }
+                } else {
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            Text("Add Recipe to '\(book.displayName)'")
+                                .font(.headline)
+                                .foregroundColor(.purple)
+                                .padding(.top)
+                            
+                            if homeViewModel.recipes.isEmpty {
+                                VStack(spacing: 12) {
+                                    Image(systemName: "doc.text")
+                                        .font(.system(size: 48))
+                                        .foregroundColor(.gray)
+                                    
+                                    Text("No recipes found")
+                                        .font(.headline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Text("Create some recipes first to add them to your book")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                        .multilineTextAlignment(.center)
+                                }
+                                .padding(40)
+                            } else {
+                                ForEach(homeViewModel.recipes) { recipe in
+                                    Button(action: {
+                                        viewModel.addRecipeToBook(recipe, bookId: book.id)
+                                        dismiss()
+                                    }) {
+                                        RecipeCardView(recipe: recipe)
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                        }
+                        .padding()
+                    }
                 }
             }
             .navigationTitle("Add Recipe")
@@ -186,11 +224,14 @@ struct AddRecipeToBookView: View {
                 }
             }
         }
+        .onAppear {
+            homeViewModel.loadUserRecipes(userId: authViewModel.getCurrentUserId())
+        }
     }
 }
 
 #Preview {
     NavigationView {
-        BookDetailView(book: RecipeBook.sample)
+        BookDetailView(book: RecipeBook.sample, viewModel: RecipeBooksViewModel())
     }
 } 

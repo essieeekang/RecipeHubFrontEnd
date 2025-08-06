@@ -12,6 +12,7 @@ import SwiftUI
 struct HomeView: View {
     @StateObject private var viewModel = HomeViewModel()
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showingAddRecipe = false
 
     var body: some View {
         NavigationView {
@@ -37,10 +38,18 @@ struct HomeView: View {
                         
                         Spacer()
                         
-                        NavigationLink(destination: SettingsView()) {
-                            Image(systemName: "gearshape.fill")
-                                .font(.title2)
-                                .foregroundColor(.purple)
+                        HStack(spacing: 16) {
+                            Button(action: { showingAddRecipe = true }) {
+                                Image(systemName: "plus.circle.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.purple)
+                            }
+                            
+                            NavigationLink(destination: SettingsView()) {
+                                Image(systemName: "gearshape.fill")
+                                    .font(.title2)
+                                    .foregroundColor(.purple)
+                            }
                         }
                     }
                     .padding(.horizontal)
@@ -104,6 +113,11 @@ struct HomeView: View {
         .refreshable {
             // Pull to refresh functionality
             viewModel.refreshRecipes(userId: authViewModel.getCurrentUserId())
+        }
+        .sheet(isPresented: $showingAddRecipe) {
+            AddRecipeView { newRecipe in
+                viewModel.addRecipe(newRecipe)
+            }
         }
     }
 }

@@ -23,7 +23,7 @@ struct Recipe: Codable, Identifiable {
     let likeCount: Int
     let authorId: Int
     let authorUsername: String
-    let originalRecipeId: Int
+    let originalRecipeId: Int?
     let createdAt: Date
     let updatedAt: Date
     
@@ -46,7 +46,7 @@ struct Recipe: Codable, Identifiable {
         likeCount = try container.decode(Int.self, forKey: .likeCount)
         authorId = try container.decode(Int.self, forKey: .authorId)
         authorUsername = try container.decode(String.self, forKey: .authorUsername)
-        originalRecipeId = try container.decode(Int.self, forKey: .originalRecipeId)
+        originalRecipeId = try container.decodeIfPresent(Int.self, forKey: .originalRecipeId)
         
         // Handle date decoding
         let dateFormatter = ISO8601DateFormatter()
@@ -64,7 +64,7 @@ struct Recipe: Codable, Identifiable {
     }
     
     // Custom initializer for creating new recipes
-    init(id: Int, title: String, description: String, ingredients: [Ingredient], instructions: [String], isPublic: Bool, cooked: Bool, favourite: Bool, likeCount: Int, authorId: Int, authorUsername: String, originalRecipeId: Int, createdAt: Date, updatedAt: Date) {
+    init(id: Int, title: String, description: String, ingredients: [Ingredient], instructions: [String], isPublic: Bool, cooked: Bool, favourite: Bool, likeCount: Int, authorId: Int, authorUsername: String, originalRecipeId: Int?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.title = title
         self.description = description
@@ -95,7 +95,7 @@ struct Recipe: Codable, Identifiable {
         try container.encode(likeCount, forKey: .likeCount)
         try container.encode(authorId, forKey: .authorId)
         try container.encode(authorUsername, forKey: .authorUsername)
-        try container.encode(originalRecipeId, forKey: .originalRecipeId)
+        try container.encodeIfPresent(originalRecipeId, forKey: .originalRecipeId)
         
         // Handle date encoding
         let dateFormatter = ISO8601DateFormatter()

@@ -7,30 +7,33 @@
 
 import Foundation
 
+struct IngredientInput: Identifiable {
+    let id = UUID()
+    var name: String = ""
+    var unit: String = ""
+    var quantity: Double = 1.0
+}
+
 class AddRecipeViewModel: ObservableObject {
     @Published var title = ""
     @Published var description = ""
     @Published var ingredients: [IngredientInput] = [IngredientInput()]
     @Published var instructions: [String] = [""]
     @Published var isPublic = true
-    @Published var errorMessage = ""
+    @Published var cooked = false
+    @Published var favourite = false
     @Published var isLoading = false
+    @Published var errorMessage = ""
     @Published var isRecipeCreated = false
-    
-    struct IngredientInput: Identifiable {
-        let id = UUID()
-        var name = ""
-        var quantity = ""
-        var unit = ""
-    }
+    @Published var createdRecipe: Recipe?
     
     var canSubmit: Bool {
         !title.isEmpty && 
-        !description.isEmpty && 
         !ingredients.isEmpty && 
-        ingredients.allSatisfy { !$0.name.isEmpty && !$0.quantity.isEmpty } &&
+        ingredients.allSatisfy { !$0.name.isEmpty && !$0.unit.isEmpty && $0.quantity > 0 } &&
         !instructions.isEmpty && 
-        instructions.allSatisfy { !$0.isEmpty }
+        instructions.allSatisfy { !$0.isEmpty } &&
+        !isLoading
     }
     
     func addIngredient() {
@@ -53,49 +56,50 @@ class AddRecipeViewModel: ObservableObject {
         }
     }
     
-    func createRecipe() {
+    func createRecipe(authorId: Int, completion: @escaping (Bool) -> Void) {
         guard canSubmit else {
             errorMessage = "Please fill in all required fields"
+            completion(false)
             return
         }
         
         isLoading = true
         errorMessage = ""
         
-        // Convert ingredients to the proper format
-        let formattedIngredients = ingredients.compactMap { ingredient -> Ingredient? in
-            guard let quantity = Double(ingredient.quantity) else { return nil }
-            return Ingredient(name: ingredient.name, unit: ingredient.unit, quantity: quantity)
+        // Convert IngredientInput to Ingredient
+        let recipeIngredients = ingredients.map { input in
+            Ingredient(name: input.name, unit: input.unit, quantity: input.quantity)
         }
         
-        // Filter out empty instructions
-        let filteredInstructions = instructions.filter { !$0.isEmpty }
-        
-        // Create the recipe object
-        let recipe = Recipe(
-            id: 0, // Will be set by server
+        let request = CreateRecipeRequest(
             title: title,
             description: description,
-            ingredients: formattedIngredients,
-            instructions: filteredInstructions,
+            ingredients: recipeIngredients,
+            instructions: instructions.filter { !$0.isEmpty },
             isPublic: isPublic,
-            cooked: false,
-            favourite: false,
-            likeCount: 0,
-            authorId: 0, // Will be set by server
-            authorUsername: "", // Will be set by server
-            originalRecipeId: 0,
-            createdAt: Date(),
-            updatedAt: Date()
+            cooked: cooked,
+            favourite: favourite,
+            authorId: authorId,
+            originalRecipeId: nil
         )
         
-        // TODO: Add API call to create recipe
-        print("Creating recipe: \(recipe.title)")
+        print("Creating recipe: \(title)")
         
-        // Simulate API call
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-            self.isLoading = false
-            self.isRecipeCreated = true
+        CreateRecipeAction(parameters: request).call { [weak self] recipe in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let newRecipe = recipe {
+                    print("Successfully created recipe: \(newRecipe.title) with ID: \(newRecipe.id)")
+                    self?.isRecipeCreated = true
+                    self?.createdRecipe = newRecipe
+                    completion(true)
+                } else {
+                    print("Failed to create recipe")
+                    self?.errorMessage = "Failed to create recipe. Please try again."
+                    completion(false)
+                }
+            }
         }
     }
     
@@ -105,7 +109,10 @@ class AddRecipeViewModel: ObservableObject {
         ingredients = [IngredientInput()]
         instructions = [""]
         isPublic = true
+        cooked = false
+        favourite = false
         errorMessage = ""
         isRecipeCreated = false
+        createdRecipe = nil
     }
 } 
