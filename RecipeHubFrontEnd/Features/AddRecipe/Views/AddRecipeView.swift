@@ -12,8 +12,10 @@ struct AddRecipeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     let onRecipeCreated: ((Recipe) -> Void)?
+    let recipeToFork: Recipe? // New parameter for forking
     
-    init(onRecipeCreated: ((Recipe) -> Void)? = nil) {
+    init(recipeToFork: Recipe? = nil, onRecipeCreated: ((Recipe) -> Void)? = nil) {
+        self.recipeToFork = recipeToFork
         self.onRecipeCreated = onRecipeCreated
     }
     
@@ -25,6 +27,26 @@ struct AddRecipeView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Forking Header (if forking)
+                        if viewModel.isForking, let originalRecipe = viewModel.originalRecipe {
+                            VStack(spacing: 8) {
+                                HStack {
+                                    Image(systemName: "arrow.triangle.branch")
+                                        .foregroundColor(.purple)
+                                    Text("Forking Recipe")
+                                        .font(.headline)
+                                        .foregroundColor(.purple)
+                                }
+                                
+                                Text("Original by \(originalRecipe.authorUsername)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(12)
+                        }
+                        
                         // Recipe Title
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Recipe Title")
@@ -139,8 +161,8 @@ struct AddRecipeView: View {
                                 .cornerRadius(8)
                         }
                         
-                        // Create Recipe Button
-                        Button(action: createRecipe) {
+                        // Submit Button
+                        Button(action: submitRecipe) {
                             HStack {
                                 if viewModel.isLoading {
                                     ProgressView()
@@ -148,7 +170,7 @@ struct AddRecipeView: View {
                                         .scaleEffect(0.8)
                                 }
                                 
-                                Text(viewModel.isLoading ? "Creating..." : "Create Recipe")
+                                Text(viewModel.submitButtonTitle)
                                     .font(.headline)
                                     .foregroundColor(.white)
                             }
@@ -163,7 +185,7 @@ struct AddRecipeView: View {
                     .padding()
                 }
             }
-            .navigationTitle("Create Recipe")
+            .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .navigationBarLeading) {
@@ -183,21 +205,36 @@ struct AddRecipeView: View {
                 dismiss()
             }
         } message: {
-            Text("Your recipe has been successfully created and saved.")
+            Text(viewModel.isForking ? "Your forked recipe has been successfully created and saved." : "Your recipe has been successfully created and saved.")
+        }
+        .onAppear {
+            if let recipe = recipeToFork {
+                viewModel.populateWithRecipe(recipe)
+            }
         }
     }
     
-    private func createRecipe() {
+    private func submitRecipe() {
         guard let currentUser = authViewModel.getCurrentUser() else {
             viewModel.errorMessage = "User not authenticated"
             return
         }
         
-        viewModel.createRecipe(authorId: currentUser.id) { success in
-            if success {
-                print("Recipe created successfully")
-            } else {
-                print("Failed to create recipe")
+        if viewModel.isForking {
+            viewModel.forkRecipe(authorId: currentUser.id) { success in
+                if success {
+                    print("Recipe forked successfully")
+                } else {
+                    print("Failed to fork recipe")
+                }
+            }
+        } else {
+            viewModel.createRecipe(authorId: currentUser.id) { success in
+                if success {
+                    print("Recipe created successfully")
+                } else {
+                    print("Failed to create recipe")
+                }
             }
         }
     }

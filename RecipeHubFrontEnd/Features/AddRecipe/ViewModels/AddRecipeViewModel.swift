@@ -27,6 +27,10 @@ class AddRecipeViewModel: ObservableObject {
     @Published var isRecipeCreated = false
     @Published var createdRecipe: Recipe?
     
+    // Forking properties
+    @Published var isForking = false
+    @Published var originalRecipe: Recipe?
+    
     var canSubmit: Bool {
         !title.isEmpty && 
         !ingredients.isEmpty && 
@@ -34,6 +38,18 @@ class AddRecipeViewModel: ObservableObject {
         !instructions.isEmpty && 
         instructions.allSatisfy { !$0.isEmpty } &&
         !isLoading
+    }
+    
+    var submitButtonTitle: String {
+        if isForking {
+            return isLoading ? "Forking..." : "Fork Recipe"
+        } else {
+            return isLoading ? "Creating..." : "Create Recipe"
+        }
+    }
+    
+    var navigationTitle: String {
+        return isForking ? "Fork Recipe" : "Create Recipe"
     }
     
     func addIngredient() {
@@ -115,5 +131,90 @@ class AddRecipeViewModel: ObservableObject {
         errorMessage = ""
         isRecipeCreated = false
         // Note: createdRecipe is not cleared here as it's needed for the alert
+    }
+    
+    func populateWithRecipe(_ recipe: Recipe) {
+        originalRecipe = recipe
+        isForking = true
+        
+        // Populate form with recipe data
+        title = "\(recipe.title) (Forked)"
+        description = recipe.description
+        isPublic = recipe.isPublic
+        cooked = recipe.cooked
+        favourite = recipe.favourite
+        
+        // Convert ingredients
+        ingredients = recipe.ingredients.map { ingredient in
+            IngredientInput(name: ingredient.name, unit: ingredient.unit, quantity: ingredient.quantity)
+        }
+        
+        // If no ingredients, add one empty
+        if ingredients.isEmpty {
+            ingredients = [IngredientInput()]
+        }
+        
+        // Convert instructions
+        instructions = recipe.instructions
+        
+        // If no instructions, add one empty
+        if instructions.isEmpty {
+            instructions = [""]
+        }
+        
+        print("Populated form with recipe: \(recipe.title)")
+    }
+    
+    func forkRecipe(authorId: Int, completion: @escaping (Bool) -> Void) {
+        guard canSubmit else {
+            errorMessage = "Please fill in all required fields"
+            completion(false)
+            return
+        }
+        
+        guard let originalRecipe = originalRecipe else {
+            errorMessage = "No original recipe to fork"
+            completion(false)
+            return
+        }
+        
+        isLoading = true
+        errorMessage = ""
+        
+        // Convert IngredientInput to Ingredient
+        let recipeIngredients = ingredients.map { input in
+            Ingredient(name: input.name, unit: input.unit, quantity: input.quantity)
+        }
+        
+        let request = ForkRecipeRequest(
+            title: title,
+            description: description,
+            ingredients: recipeIngredients,
+            instructions: instructions.filter { !$0.isEmpty },
+            isPublic: isPublic,
+            cooked: cooked,
+            favourite: favourite,
+            authorId: authorId
+        )
+        
+        print("Forking recipe: \(title) from original: \(originalRecipe.title)")
+        
+        ForkRecipeAction(recipeId: originalRecipe.id, parameters: request).call { [weak self] forkedRecipe in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let newRecipe = forkedRecipe {
+                    print("Successfully forked recipe: \(newRecipe.title) with ID: \(newRecipe.id)")
+                    self?.createdRecipe = newRecipe
+                    self?.isRecipeCreated = true
+                    self?.resetForm()
+                    completion(true)
+                } else {
+                    print("Failed to fork recipe")
+                    self?.errorMessage = "Failed to fork recipe. Please try again."
+                    completion(false)
+                }
+            }
+        }
     }
 } 
