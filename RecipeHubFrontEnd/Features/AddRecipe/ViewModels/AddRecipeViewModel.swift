@@ -91,8 +91,9 @@ class AddRecipeViewModel: ObservableObject {
                 
                 if let newRecipe = recipe {
                     print("Successfully created recipe: \(newRecipe.title) with ID: \(newRecipe.id)")
+                    self?.createdRecipe = newRecipe // Store before resetting
                     self?.isRecipeCreated = true
-                    self?.createdRecipe = newRecipe
+                    self?.resetForm() // Reset form after successful creation
                     completion(true)
                 } else {
                     print("Failed to create recipe")
@@ -113,6 +114,6 @@ class AddRecipeViewModel: ObservableObject {
         favourite = false
         errorMessage = ""
         isRecipeCreated = false
-        createdRecipe = nil
+        // Note: createdRecipe is not cleared here as it's needed for the alert
     }
 } 
