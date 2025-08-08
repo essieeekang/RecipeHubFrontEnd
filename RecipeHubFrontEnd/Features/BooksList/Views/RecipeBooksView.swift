@@ -82,6 +82,13 @@ struct RecipeBooksView: View {
                                     }
                                     .buttonStyle(PlainButtonStyle())
                                     .padding(.horizontal)
+                                    .swipeActions(edge: .trailing, allowsFullSwipe: false) {
+                                        Button(role: .destructive) {
+                                            deleteBook(book)
+                                        } label: {
+                                            Label("Delete", systemImage: "trash")
+                                        }
+                                    }
                                 }
                             }
                             .padding(.vertical)
@@ -105,6 +112,16 @@ struct RecipeBooksView: View {
         .refreshable {
             // Pull to refresh functionality
             viewModel.refreshBooks(userId: authViewModel.getCurrentUserId())
+        }
+    }
+    
+    private func deleteBook(_ book: RecipeBook) {
+        viewModel.deleteBook(book) { success in
+            if success {
+                print("Successfully deleted book: \(book.name)")
+            } else {
+                print("Failed to delete book: \(book.name)")
+            }
         }
     }
 }

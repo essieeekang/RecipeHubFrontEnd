@@ -11,10 +11,12 @@ struct RecipeBookCardView: View {
     let book: RecipeBook
     @ObservedObject var viewModel: RecipeBooksViewModel
     @State private var showingEditSheet = false
+    @State private var showingDeleteAlert = false
+    @State private var isDeleting = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Book name, privacy indicator, and edit button
+            // Book name, privacy indicator, and action buttons
             HStack {
                 Text(book.displayName)
                     .font(.title3)
@@ -45,6 +47,18 @@ struct RecipeBookCardView: View {
                             .foregroundColor(.purple)
                     }
                     .buttonStyle(PlainButtonStyle())
+                    .disabled(isDeleting)
+                    
+                    // Delete button
+                    Button(action: {
+                        showingDeleteAlert = true
+                    }) {
+                        Image(systemName: "trash")
+                            .font(.caption)
+                            .foregroundColor(.red)
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(isDeleting)
                 }
             }
             
@@ -88,6 +102,38 @@ struct RecipeBookCardView: View {
         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
         .sheet(isPresented: $showingEditSheet) {
             EditBookView(book: book, viewModel: viewModel)
+        }
+        .alert("Delete Recipe Book", isPresented: $showingDeleteAlert) {
+            Button("Cancel", role: .cancel) { }
+            Button("Delete", role: .destructive) {
+                deleteBook()
+            }
+        } message: {
+            Text("Are you sure you want to delete '\(book.name)'? This action cannot be undone.")
+        }
+        .overlay(
+            Group {
+                if isDeleting {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                        .scaleEffect(0.8)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(16)
+                }
+            }
+        )
+    }
+    
+    private func deleteBook() {
+        isDeleting = true
+        
+        viewModel.deleteBook(book) { success in
+            isDeleting = false
+            if !success {
+                // Error is already handled in the view model
+                print("Failed to delete book")
+            }
         }
     }
 }

@@ -82,10 +82,26 @@ class RecipeBooksViewModel: ObservableObject {
         }
     }
     
-    func deleteBook(_ book: RecipeBook) {
-        // TODO: Implement API call to delete book
-        DispatchQueue.main.async {
-            self.books.removeAll { $0.id == book.id }
+    func deleteBook(_ book: RecipeBook, completion: @escaping (Bool) -> Void) {
+        isLoading = true
+        errorMessage = ""
+        
+        print("Deleting recipe book: \(book.name) with ID: \(book.id)")
+        
+        DeleteRecipeBookAction(bookId: book.id).call { [weak self] success in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if success {
+                    print("Successfully deleted recipe book: \(book.name)")
+                    self?.books.removeAll { $0.id == book.id }
+                    completion(true)
+                } else {
+                    print("Failed to delete recipe book: \(book.name)")
+                    self?.errorMessage = "Failed to delete recipe book. Please try again."
+                    completion(false)
+                }
+            }
         }
     }
     
