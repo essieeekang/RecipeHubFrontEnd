@@ -133,7 +133,13 @@ class AddRecipeViewModel: ObservableObject {
         // Note: createdRecipe is not cleared here as it's needed for the alert
     }
     
-    func populateWithRecipe(_ recipe: Recipe) {
+    func populateWithRecipe(_ recipe: Recipe, currentUserId: Int) {
+        // Prevent forking your own recipes
+        if recipe.authorId == currentUserId {
+            print("Cannot fork your own recipe")
+            return
+        }
+        
         originalRecipe = recipe
         isForking = true
         

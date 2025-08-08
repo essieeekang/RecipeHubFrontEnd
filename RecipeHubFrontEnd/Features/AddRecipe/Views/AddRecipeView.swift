@@ -208,8 +208,8 @@ struct AddRecipeView: View {
             Text(viewModel.isForking ? "Your forked recipe has been successfully created and saved." : "Your recipe has been successfully created and saved.")
         }
         .onAppear {
-            if let recipe = recipeToFork {
-                viewModel.populateWithRecipe(recipe)
+            if let recipe = recipeToFork, let currentUserId = authViewModel.getCurrentUserId() {
+                viewModel.populateWithRecipe(recipe, currentUserId: currentUserId)
             }
         }
     }

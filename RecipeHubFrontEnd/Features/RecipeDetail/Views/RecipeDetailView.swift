@@ -10,6 +10,7 @@ import SwiftUI
 struct RecipeDetailView: View {
     @ObservedObject var viewModel: RecipeDetailViewModel
     @State private var showingForkSheet = false
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     var body: some View {
         ZStack {
@@ -42,21 +43,23 @@ struct RecipeDetailView: View {
                             
                             Spacer()
                             
-                            // Fork button
-                            Button(action: {
-                                showingForkSheet = true
-                            }) {
-                                HStack(spacing: 4) {
-                                    Image(systemName: "arrow.triangle.branch")
-                                        .foregroundColor(.purple)
-                                    Text("Fork")
-                                        .font(.caption)
-                                        .foregroundColor(.purple)
+                            // Fork button (only show if recipe is not by current user)
+                            if let currentUserId = authViewModel.getCurrentUserId(), currentUserId != viewModel.recipe.authorId {
+                                Button(action: {
+                                    showingForkSheet = true
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Image(systemName: "arrow.triangle.branch")
+                                            .foregroundColor(.purple)
+                                        Text("Fork")
+                                            .font(.caption)
+                                            .foregroundColor(.purple)
+                                    }
+                                    .padding(.horizontal, 12)
+                                    .padding(.vertical, 6)
+                                    .background(Color.purple.opacity(0.1))
+                                    .cornerRadius(20)
                                 }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.purple.opacity(0.1))
-                                .cornerRadius(20)
                             }
                         }
                         

@@ -11,6 +11,7 @@ import SwiftUI
 struct RecipeCardView: View {
     let recipe: Recipe
     @State private var showingForkSheet = false
+    @EnvironmentObject var authViewModel: AuthViewModel
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -24,15 +25,17 @@ struct RecipeCardView: View {
                 
                 Spacer()
                 
-                // Fork button (only show if recipe has originalRecipeId or is not by current user)
-                Button(action: {
-                    showingForkSheet = true
-                }) {
-                    Image(systemName: "arrow.triangle.branch")
-                        .foregroundColor(.purple)
-                        .font(.caption)
+                // Fork button (only show if recipe is not by current user)
+                if let currentUserId = authViewModel.getCurrentUserId(), currentUserId != recipe.authorId {
+                    Button(action: {
+                        showingForkSheet = true
+                    }) {
+                        Image(systemName: "arrow.triangle.branch")
+                            .foregroundColor(.purple)
+                            .font(.caption)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
-                .buttonStyle(PlainButtonStyle())
             }
             
             // Recipe Description
