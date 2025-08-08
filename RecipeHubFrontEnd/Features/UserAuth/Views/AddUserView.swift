@@ -63,6 +63,13 @@ struct AddUserView: View {
                     }
                 }
                 .buttonStyle(FilledButtonStyle())
+                .disabled(authViewModel.isLoading)
+                
+                if authViewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                        .scaleEffect(0.8)
+                }
                 
                 if !authViewModel.errorMessage.isEmpty {
                     Text(authViewModel.errorMessage)

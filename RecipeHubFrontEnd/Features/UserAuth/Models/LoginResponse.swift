@@ -7,7 +7,5 @@
 
 struct LoginResponse: Decodable {
     let message: String
-    let userId: Int
-    let username: String
-    let email: String
+    let user: User
 }

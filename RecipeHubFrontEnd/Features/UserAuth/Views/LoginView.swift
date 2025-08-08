@@ -47,13 +47,18 @@ struct LoginView: View {
                     print("Login button tapped")
                     print("Username: \(authViewModel.username)")
                     print("Password: \(authViewModel.password)")
-                    authViewModel.login {
-                        print("Login completion handler called")
-                        // Navigation is handled automatically by RootView
-                        // when isLoggedIn becomes true
-                    }
+                    authViewModel.login()
+                    // Navigation is handled automatically by RootView
+                    // when isLoggedIn becomes true
                 }
                 .buttonStyle(FilledButtonStyle())
+                .disabled(authViewModel.isLoading)
+                
+                if authViewModel.isLoading {
+                    ProgressView()
+                        .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                        .scaleEffect(0.8)
+                }
                 
                 if !authViewModel.errorMessage.isEmpty {
                     Text(authViewModel.errorMessage)

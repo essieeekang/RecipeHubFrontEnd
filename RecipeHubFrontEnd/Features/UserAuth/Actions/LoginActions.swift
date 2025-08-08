@@ -8,10 +8,9 @@
 import Foundation
 
 struct LoginAction {
-    var parameters: LoginRequest
-    func call(completion: @escaping (LoginResponse) -> Void) {
-//        let scheme: String = "https"
-//        let host: String = "back-end-recipe-hub.onrender.com"
+    var request: LoginRequest
+    
+    func call(completion: @escaping (LoginResponse?) -> Void) {
         let scheme: String = "http"
         let host: String = "127.0.0.1"
         let port: Int = 8080
@@ -25,6 +24,7 @@ struct LoginAction {
 
         guard let url = components.url else {
             print("Failed to create URL")
+            completion(nil)
             return
         }
         
@@ -37,44 +37,66 @@ struct LoginAction {
         request.addValue("application/json", forHTTPHeaderField: "Accept")
 
         do {
-            request.httpBody = try JSONEncoder().encode(parameters)
+            request.httpBody = try JSONEncoder().encode(self.request)
             if let bodyString = String(data: request.httpBody!, encoding: .utf8) {
                 print("Request body: \(bodyString)")
             }
         } catch {
             print("Encoding error: \(error)")
+            completion(nil)
             return
         }
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
                 return
             }
 
-            if let httpResponse = response as? HTTPURLResponse {
-                print("Status code: \(httpResponse.statusCode)")
-                if httpResponse.statusCode != 200 {
-                    print("Login failed with status code: \(httpResponse.statusCode)")
-                    return
-                } else {
-                    print("Login successful")
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response type")
+                DispatchQueue.main.async {
+                    completion(nil)
                 }
+                return
+            }
+            
+            print("Status code: \(httpResponse.statusCode)")
+            if httpResponse.statusCode != 200 {
+                print("Login failed with status code: \(httpResponse.statusCode)")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
+                return
             }
 
             guard let data = data else {
                 print("No data returned")
+                DispatchQueue.main.async {
+                    completion(nil)
+                }
                 return
+            }
+
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("Raw response data: \(dataString)")
             }
 
             do {
                 let response = try JSONDecoder().decode(LoginResponse.self, from: data)
                 print("Login successful, response: \(response)")
-                completion(response)
+                print("User ID: \(response.user.id), Username: \(response.user.username)")
+                DispatchQueue.main.async {
+                    completion(response)
+                }
             } catch {
                 print("Decoding error: \(error)")
-                if let dataString = String(data: data, encoding: .utf8) {
-                    print("Raw response data: \(dataString)")
+                print("Error details: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(nil)
                 }
             }
         }

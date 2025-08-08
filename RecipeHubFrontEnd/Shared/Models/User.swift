@@ -12,7 +12,7 @@ struct User: Codable {
     let username: String
     let email: String
     let createdAt: String
-    let updatedAt: String
+    let updatedAt: String?
     
     var displayName: String {
         return username

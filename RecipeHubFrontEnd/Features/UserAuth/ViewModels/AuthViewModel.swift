@@ -18,6 +18,7 @@ class AuthViewModel: ObservableObject {
     @Published var email: String = ""
     @Published var password: String = ""
     @Published var errorMessage: String = ""
+    @Published var isLoading: Bool = false
     
     // UserDefaults keys
     private let userDefaultsKey = "currentUser"
@@ -68,40 +69,35 @@ class AuthViewModel: ObservableObject {
         UserDefaults.standard.set(false, forKey: isLoggedInKey)
     }
 
-    func login(completion handler: @escaping () -> Void) {
-        guard !username.isEmpty, !password.isEmpty else {
-            errorMessage = "Username and password cannot be empty"
+    func login() {
+        guard !username.isEmpty && !password.isEmpty else {
+            errorMessage = "Please enter both username and password"
             return
         }
         
+        isLoading = true
+        errorMessage = ""
+        
         print("Attempting login with username: \(username)")
         
-        LoginAction(
-            parameters: LoginRequest(
-                username: username,
-                password: password
-            )
-        ).call { response in
-            print("LoginAction completion called with response: \(response)")
+        let request = LoginRequest(username: username, password: password)
+        
+        LoginAction(request: request).call { [weak self] response in
             DispatchQueue.main.async {
-                print("Login successful! Welcome: \(response.username)")
-                print("Setting isLoggedIn to true")
+                self?.isLoading = false
                 
-                // Create a user object from login response
-                let user = User(
-                    id: response.userId,
-                    username: response.username,
-                    email: response.email,
-                    createdAt: ISO8601DateFormatter().string(from: Date()),
-                    updatedAt: ISO8601DateFormatter().string(from: Date())
-                )
-                
-                self.setCurrentUser(user)
-                self.isLoggedIn = true
-                print("isLoggedIn is now: \(self.isLoggedIn)")
-                self.errorMessage = ""
-                print("Calling login completion handler")
-                handler()
+                if let response = response {
+                    print("Login successful! Welcome: \(response.message)")
+                    print("User ID: \(response.user.id), Username: \(response.user.username)")
+                    
+                    // Set the current user from the response
+                    self?.setCurrentUser(response.user)
+                    self?.isLoggedIn = true
+                    print("isLoggedIn is now: \(self?.isLoggedIn ?? false)")
+                } else {
+                    print("Login failed")
+                    self?.errorMessage = "Login failed. Please check your credentials."
+                }
             }
         }
     }
@@ -112,6 +108,9 @@ class AuthViewModel: ObservableObject {
             return
         }
         
+        isLoading = true
+        errorMessage = ""
+        
         print("Attempting to create user with username: \(username), email: \(email)")
         
         AddUserAction(
@@ -120,9 +119,11 @@ class AuthViewModel: ObservableObject {
                 email: email,
                 password: password
             )
-        ).call { response in
-            print("AddUserAction completion called with response: \(response)")
+        ).call { [weak self] response in
             DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                print("AddUserAction completion called with response: \(response)")
                 print("User creation successful! Welcome: \(response.username)")
                 print("Setting isLoggedIn to true")
                 
@@ -135,9 +136,9 @@ class AuthViewModel: ObservableObject {
                     updatedAt: ISO8601DateFormatter().string(from: Date())
                 )
                 
-                self.setCurrentUser(user)
-                self.isLoggedIn = true
-                self.errorMessage = ""
+                self?.setCurrentUser(user)
+                self?.isLoggedIn = true
+                self?.errorMessage = ""
                 print("Calling addUser completion handler")
                 handler()
             }
