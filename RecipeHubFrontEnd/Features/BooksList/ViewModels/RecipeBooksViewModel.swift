@@ -184,4 +184,40 @@ class RecipeBooksViewModel: ObservableObject {
             }
         }
     }
+    
+    func editRecipeBook(bookId: Int, name: String?, description: String?, isPublic: Bool?, recipeIds: [Int]?, completion: @escaping (Bool) -> Void) {
+        isLoading = true
+        errorMessage = ""
+        
+        let request = UpdateRecipeBookRequest(
+            name: name,
+            description: description,
+            isPublic: isPublic,
+            recipeIds: recipeIds
+        )
+        
+        print("Editing recipe book with ID: \(bookId)")
+        print("Update request: name=\(name ?? "nil"), description=\(description ?? "nil"), isPublic=\(isPublic?.description ?? "nil"), recipeIds=\(recipeIds?.description ?? "nil")")
+        
+        UpdateRecipeBookAction(bookId: bookId, parameters: request).call { [weak self] updatedBook in
+            DispatchQueue.main.async {
+                self?.isLoading = false
+                
+                if let book = updatedBook {
+                    print("Successfully updated recipe book: \(book.name)")
+                    
+                    // Update the book in the local array
+                    if let index = self?.books.firstIndex(where: { $0.id == bookId }) {
+                        self?.books[index] = book
+                    }
+                    
+                    completion(true)
+                } else {
+                    print("Failed to update recipe book")
+                    self?.errorMessage = "Failed to update recipe book. Please try again."
+                    completion(false)
+                }
+            }
+        }
+    }
 } 

@@ -9,10 +9,12 @@ import SwiftUI
 
 struct RecipeBookCardView: View {
     let book: RecipeBook
+    @ObservedObject var viewModel: RecipeBooksViewModel
+    @State private var showingEditSheet = false
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Book name and privacy indicator
+            // Book name, privacy indicator, and edit button
             HStack {
                 Text(book.displayName)
                     .font(.title3)
@@ -22,14 +24,27 @@ struct RecipeBookCardView: View {
                 
                 Spacer()
                 
-                HStack(spacing: 4) {
-                    Image(systemName: book.isPublic ? "globe" : "lock")
-                        .font(.caption)
-                        .foregroundColor(book.isPublic ? .green : .orange)
+                HStack(spacing: 8) {
+                    // Privacy indicator
+                    HStack(spacing: 4) {
+                        Image(systemName: book.isPublic ? "globe" : "lock")
+                            .font(.caption)
+                            .foregroundColor(book.isPublic ? .green : .orange)
+                        
+                        Text(book.isPublic ? "Public" : "Private")
+                            .font(.caption)
+                            .foregroundColor(book.isPublic ? .green : .orange)
+                    }
                     
-                    Text(book.isPublic ? "Public" : "Private")
-                        .font(.caption)
-                        .foregroundColor(book.isPublic ? .green : .orange)
+                    // Edit button
+                    Button(action: {
+                        showingEditSheet = true
+                    }) {
+                        Image(systemName: "pencil")
+                            .font(.caption)
+                            .foregroundColor(.purple)
+                    }
+                    .buttonStyle(PlainButtonStyle())
                 }
             }
             
@@ -71,10 +86,13 @@ struct RecipeBookCardView: View {
         .background(Color.white)
         .cornerRadius(16)
         .shadow(color: Color.black.opacity(0.1), radius: 8, x: 0, y: 4)
+        .sheet(isPresented: $showingEditSheet) {
+            EditBookView(book: book, viewModel: viewModel)
+        }
     }
 }
 
 #Preview {
-    RecipeBookCardView(book: RecipeBook.sample)
+    RecipeBookCardView(book: RecipeBook.sample, viewModel: RecipeBooksViewModel())
         .padding()
 } 

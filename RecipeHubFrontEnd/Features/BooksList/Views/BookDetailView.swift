@@ -10,7 +10,9 @@ import SwiftUI
 struct BookDetailView: View {
     let book: RecipeBook
     @ObservedObject var viewModel: RecipeBooksViewModel
+    @EnvironmentObject var authViewModel: AuthViewModel
     @State private var showingAddRecipe = false
+    @StateObject private var homeViewModel = HomeViewModel()
     
     var body: some View {
         ZStack {
@@ -107,24 +109,67 @@ struct BookDetailView: View {
                             .background(Color.white)
                             .cornerRadius(16)
                         } else {
-                            VStack(spacing: 12) {
-                                ForEach(book.recipeIds, id: \.self) { recipeId in
-                                    // TODO: Fetch recipe details by ID
-                                    // For now, show a placeholder
-                                    HStack {
-                                        Text("Recipe #\(recipeId)")
-                                            .font(.subheadline)
-                                            .foregroundColor(.secondary)
-                                        
-                                        Spacer()
-                                        
-                                        Image(systemName: "chevron.right")
+                            // Display actual recipe cards
+                            if homeViewModel.isLoading {
+                                VStack(spacing: 16) {
+                                    ProgressView()
+                                        .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                                    Text("Loading recipes...")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(40)
+                            } else if !homeViewModel.errorMessage.isEmpty {
+                                VStack(spacing: 16) {
+                                    Image(systemName: "exclamationmark.triangle")
+                                        .font(.system(size: 48))
+                                        .foregroundColor(.orange)
+                                    
+                                    Text("Error loading recipes")
+                                        .font(.headline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Text(homeViewModel.errorMessage)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                        .multilineTextAlignment(.center)
+                                }
+                                .frame(maxWidth: .infinity)
+                                .padding(40)
+                            } else {
+                                // Filter recipes to only show those in the book
+                                let bookRecipes = homeViewModel.recipes.filter { recipe in
+                                    book.recipeIds.contains(recipe.id)
+                                }
+                                
+                                if bookRecipes.isEmpty {
+                                    VStack(spacing: 12) {
+                                        Image(systemName: "doc.text")
+                                            .font(.system(size: 48))
                                             .foregroundColor(.gray)
-                                            .font(.caption)
+                                        
+                                        Text("No recipes found")
+                                            .font(.headline)
+                                            .foregroundColor(.gray)
+                                        
+                                        Text("The recipes in this book may have been deleted")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                            .multilineTextAlignment(.center)
                                     }
-                                    .padding()
+                                    .padding(40)
                                     .background(Color.white)
-                                    .cornerRadius(12)
+                                    .cornerRadius(16)
+                                } else {
+                                    VStack(spacing: 12) {
+                                        ForEach(bookRecipes) { recipe in
+                                            NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
+                                                RecipeCardView(recipe: recipe)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -137,6 +182,10 @@ struct BookDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingAddRecipe) {
             AddRecipeToBookView(book: book, viewModel: viewModel)
+        }
+        .onAppear {
+            // Load all user recipes to display the ones in this book
+            homeViewModel.loadUserRecipes(userId: authViewModel.getCurrentUserId())
         }
     }
 }

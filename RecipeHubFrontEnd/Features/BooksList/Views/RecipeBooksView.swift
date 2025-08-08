@@ -78,7 +78,7 @@ struct RecipeBooksView: View {
                             LazyVStack(spacing: 16) {
                                 ForEach(viewModel.books) { book in
                                     NavigationLink(destination: BookDetailView(book: book, viewModel: viewModel)) {
-                                        RecipeBookCardView(book: book)
+                                        RecipeBookCardView(book: book, viewModel: viewModel)
                                     }
                                     .buttonStyle(PlainButtonStyle())
                                     .padding(.horizontal)
