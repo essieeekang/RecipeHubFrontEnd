@@ -76,9 +76,18 @@ struct RecipeCardView: View {
                 
                 Spacer()
                 
-                Text("by \(recipe.authorUsername)")
-                    .font(.caption)
-                    .foregroundColor(.secondary)
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text("by \(recipe.authorUsername)")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    
+                    // Show forking information if this is a forked recipe
+                    if let originalRecipeId = recipe.originalRecipeId {
+                        Text("Forked from recipe #\(originalRecipeId)")
+                            .font(.caption2)
+                            .foregroundColor(.purple)
+                    }
+                }
             }
             
             // Recipe Status Indicators

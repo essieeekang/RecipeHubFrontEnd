@@ -53,13 +53,23 @@ struct RecipeDetailView: View {
                                 
                                 // Show forking information if this is a forked recipe
                                 if let originalRecipeId = viewModel.recipe.originalRecipeId {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "arrow.triangle.branch")
-                                            .foregroundColor(.purple)
-                                            .font(.caption)
-                                        Text("Forked from recipe #\(originalRecipeId)")
-                                            .font(.caption)
-                                            .foregroundColor(.purple)
+                                    VStack(spacing: 4) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.triangle.branch")
+                                                .foregroundColor(.purple)
+                                                .font(.caption)
+                                            Text("Forked Recipe")
+                                                .font(.caption)
+                                                .foregroundColor(.purple)
+                                        }
+                                        
+                                        Text("Original Recipe ID: #\(originalRecipeId)")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
+                                        
+                                        Text("Forked by: \(viewModel.recipe.authorUsername)")
+                                            .font(.caption2)
+                                            .foregroundColor(.gray)
                                     }
                                 }
                             }

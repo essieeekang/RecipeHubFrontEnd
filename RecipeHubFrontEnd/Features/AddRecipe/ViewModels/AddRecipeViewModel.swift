@@ -239,7 +239,8 @@ class AddRecipeViewModel: ObservableObject {
             isPublic: isPublic,
             cooked: cooked,
             favourite: favourite,
-            authorId: authorId
+            authorId: authorId,
+            originalRecipeId: originalRecipe.id
         )
         
         print("Forking recipe: \(title) from original: \(originalRecipe.title)")

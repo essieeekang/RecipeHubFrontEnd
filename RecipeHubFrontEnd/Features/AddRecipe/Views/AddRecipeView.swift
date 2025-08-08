@@ -41,9 +41,21 @@ struct AddRecipeView: View {
                                         .foregroundColor(.purple)
                                 }
                                 
-                                Text("Original by \(originalRecipe.authorUsername)")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
+                                VStack(spacing: 4) {
+                                    Text("Original Recipe: \(originalRecipe.title)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Text("Originally by: \(originalRecipe.authorUsername)")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    if let currentUsername = authViewModel.getCurrentUsername() {
+                                        Text("You will be credited as the forker")
+                                            .font(.caption)
+                                            .foregroundColor(.purple)
+                                    }
+                                }
                             }
                             .padding()
                             .background(Color.white)

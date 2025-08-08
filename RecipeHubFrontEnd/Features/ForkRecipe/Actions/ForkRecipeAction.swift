@@ -16,6 +16,7 @@ struct ForkRecipeRequest: Codable {
     let cooked: Bool
     let favourite: Bool
     let authorId: Int
+    let originalRecipeId: Int
 }
 
 struct ForkRecipeAction {
