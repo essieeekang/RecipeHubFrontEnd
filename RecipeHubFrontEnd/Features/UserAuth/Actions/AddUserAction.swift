@@ -13,7 +13,7 @@ struct AddUserAction {
 //        let scheme: String = "https"
 //        let host: String = "back-end-recipe-hub.onrender.com"
         let scheme: String = "http"
-        let host: String = "127.0.0.1"
+        let host: String = "192.168.0.166"
         let port: Int = 8080
         let path = "/api/auth/register"
 

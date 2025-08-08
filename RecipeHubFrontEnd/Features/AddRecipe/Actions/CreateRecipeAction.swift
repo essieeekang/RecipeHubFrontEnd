@@ -17,13 +17,15 @@ struct CreateRecipeRequest: Codable {
     let favourite: Bool
     let authorId: Int
     let originalRecipeId: Int?
+    let imageData: Data?
+    let imageFileName: String?
 }
 
 struct CreateRecipeAction {
     let parameters: CreateRecipeRequest
     
     func call(completion: @escaping (Recipe?) -> Void) {
-        guard let url = URL(string: "http://127.0.0.1:8080/api/recipes") else {
+        guard let url = URL(string: "http://192.168.0.166:8080/api/recipes") else {
             print("Failed to create URL for creating recipe")
             completion(nil)
             return
@@ -71,6 +73,15 @@ struct CreateRecipeAction {
         
         if let originalRecipeId = parameters.originalRecipeId {
             addFormField(named: "originalRecipeId", value: String(originalRecipeId))
+        }
+        
+        // Add image file if provided
+        if let imageData = parameters.imageData, let fileName = parameters.imageFileName {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
+            body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+            body.append(imageData)
+            body.append("\r\n".data(using: .utf8)!)
         }
         
         // Add final boundary

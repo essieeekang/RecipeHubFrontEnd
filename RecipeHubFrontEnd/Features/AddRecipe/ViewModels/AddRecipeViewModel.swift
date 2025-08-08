@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import UIKit
 
 struct IngredientInput: Identifiable {
     let id = UUID()
@@ -30,6 +31,12 @@ class AddRecipeViewModel: ObservableObject {
     // Forking properties
     @Published var isForking = false
     @Published var originalRecipe: Recipe?
+    
+    // Image selection properties
+    @Published var selectedImage: UIImage?
+    @Published var showingImagePicker = false
+    @Published var showingCamera = false
+    @Published var showingImageOptions = false
     
     var canSubmit: Bool {
         !title.isEmpty && 
@@ -72,6 +79,24 @@ class AddRecipeViewModel: ObservableObject {
         }
     }
     
+    func addImage() {
+        showingImageOptions = true
+    }
+    
+    func selectFromLibrary() {
+        showingImagePicker = true
+        showingImageOptions = false
+    }
+    
+    func takePhoto() {
+        showingCamera = true
+        showingImageOptions = false
+    }
+    
+    func removeImage() {
+        selectedImage = nil
+    }
+    
     func createRecipe(authorId: Int, completion: @escaping (Bool) -> Void) {
         guard canSubmit else {
             errorMessage = "Please fill in all required fields"
@@ -87,6 +112,15 @@ class AddRecipeViewModel: ObservableObject {
             Ingredient(name: input.name, unit: input.unit, quantity: input.quantity)
         }
         
+        // Convert image to Data if selected
+        var imageData: Data?
+        var imageFileName: String?
+        
+        if let image = selectedImage {
+            imageData = image.jpegData(compressionQuality: 0.8)
+            imageFileName = "recipe_image_\(Date().timeIntervalSince1970).jpg"
+        }
+        
         let request = CreateRecipeRequest(
             title: title,
             description: description,
@@ -96,20 +130,25 @@ class AddRecipeViewModel: ObservableObject {
             cooked: cooked,
             favourite: favourite,
             authorId: authorId,
-            originalRecipeId: nil
+            originalRecipeId: nil,
+            imageData: imageData,
+            imageFileName: imageFileName
         )
         
         print("Creating recipe: \(title)")
+        if imageData != nil {
+            print("Including image: \(imageFileName ?? "unknown")")
+        }
         
-        CreateRecipeAction(parameters: request).call { [weak self] recipe in
+        CreateRecipeAction(parameters: request).call { [weak self] newRecipe in
             DispatchQueue.main.async {
                 self?.isLoading = false
                 
-                if let newRecipe = recipe {
-                    print("Successfully created recipe: \(newRecipe.title) with ID: \(newRecipe.id)")
-                    self?.createdRecipe = newRecipe // Store before resetting
+                if let recipe = newRecipe {
+                    print("Successfully created recipe: \(recipe.title) with ID: \(recipe.id)")
+                    self?.createdRecipe = recipe
                     self?.isRecipeCreated = true
-                    self?.resetForm() // Reset form after successful creation
+                    self?.resetForm()
                     completion(true)
                 } else {
                     print("Failed to create recipe")
@@ -129,7 +168,7 @@ class AddRecipeViewModel: ObservableObject {
         cooked = false
         favourite = false
         errorMessage = ""
-        isRecipeCreated = false
+        selectedImage = nil
         // Note: createdRecipe is not cleared here as it's needed for the alert
     }
     

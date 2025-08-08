@@ -19,6 +19,29 @@ struct RecipeDetailView: View {
             
             ScrollView {
                 VStack(spacing: 20) {
+                    // Recipe Image (if available)
+                    if let imageUrl = viewModel.recipe.imageUrl, !imageUrl.isEmpty {
+                        AsyncImage(url: URL(string: imageUrl)) { image in
+                            image
+                                .resizable()
+                                .aspectRatio(contentMode: .fill)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 250)
+                                .clipped()
+                        } placeholder: {
+                            Rectangle()
+                                .fill(Color.gray.opacity(0.3))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 250)
+                                .overlay(
+                                    Image(systemName: "photo")
+                                        .font(.largeTitle)
+                                        .foregroundColor(.gray)
+                                )
+                        }
+                        .cornerRadius(16)
+                    }
+                    
                     // Recipe Header
                     VStack(spacing: 12) {
                         HStack {

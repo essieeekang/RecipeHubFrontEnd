@@ -15,6 +15,26 @@ struct RecipeCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
+            // Recipe Image (if available)
+            if let imageUrl = recipe.imageUrl, !imageUrl.isEmpty {
+                AsyncImage(url: URL(string: imageUrl)) { image in
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .frame(height: 120)
+                        .clipped()
+                } placeholder: {
+                    Rectangle()
+                        .fill(Color.gray.opacity(0.3))
+                        .frame(height: 120)
+                        .overlay(
+                            Image(systemName: "photo")
+                                .foregroundColor(.gray)
+                        )
+                }
+                .cornerRadius(12)
+            }
+            
             // Recipe Title and Fork Button
             HStack {
                 Text(recipe.title)

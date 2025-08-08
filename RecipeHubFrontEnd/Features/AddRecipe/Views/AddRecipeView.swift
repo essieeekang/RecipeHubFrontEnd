@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct AddRecipeView: View {
     @StateObject private var viewModel = AddRecipeViewModel()
@@ -13,6 +14,8 @@ struct AddRecipeView: View {
     @Environment(\.dismiss) private var dismiss
     let onRecipeCreated: ((Recipe) -> Void)?
     let recipeToFork: Recipe? // New parameter for forking
+    
+    @State private var selectedPhotoItem: PhotosPickerItem?
     
     init(recipeToFork: Recipe? = nil, onRecipeCreated: ((Recipe) -> Void)? = nil) {
         self.recipeToFork = recipeToFork
@@ -68,6 +71,53 @@ struct AddRecipeView: View {
                                 .textFieldStyle(RoundedField())
                                 .lineLimit(3...6)
                                 .disabled(viewModel.isLoading)
+                        }
+                        
+                        // Recipe Image
+                        VStack(alignment: .leading, spacing: 12) {
+                            Text("Recipe Image")
+                                .font(.headline)
+                                .foregroundColor(.purple)
+                            
+                            if let selectedImage = viewModel.selectedImage {
+                                VStack(spacing: 8) {
+                                    Image(uiImage: selectedImage)
+                                        .resizable()
+                                        .aspectRatio(contentMode: .fill)
+                                        .frame(height: 200)
+                                        .clipped()
+                                        .cornerRadius(12)
+                                    
+                                    Button("Remove Image") {
+                                        viewModel.removeImage()
+                                    }
+                                    .foregroundColor(.red)
+                                    .font(.caption)
+                                }
+                            } else {
+                                Button(action: viewModel.addImage) {
+                                    VStack(spacing: 8) {
+                                        Image(systemName: "camera.fill")
+                                            .font(.largeTitle)
+                                            .foregroundColor(.purple)
+                                        Text("Add Recipe Photo")
+                                            .font(.subheadline)
+                                            .foregroundColor(.purple)
+                                        Text("Camera or Library")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .frame(height: 120)
+                                    .background(Color.purple.opacity(0.1))
+                                    .cornerRadius(12)
+                                    .overlay(
+                                        RoundedRectangle(cornerRadius: 12)
+                                            .stroke(Color.purple.opacity(0.3), lineWidth: 2)
+                                    )
+                                }
+                                .disabled(viewModel.isLoading)
+                            }
                         }
                         
                         // Ingredients Section
@@ -211,6 +261,37 @@ struct AddRecipeView: View {
             if let recipe = recipeToFork, let currentUserId = authViewModel.getCurrentUserId() {
                 viewModel.populateWithRecipe(recipe, currentUserId: currentUserId)
             }
+        }
+        .photosPicker(isPresented: $viewModel.showingImagePicker, selection: $selectedPhotoItem, matching: .images)
+        .onChange(of: selectedPhotoItem) { _, newItem in
+            Task {
+                if let data = try? await newItem?.loadTransferable(type: Data.self),
+                   let image = UIImage(data: data) {
+                    await MainActor.run {
+                        viewModel.selectedImage = image
+                    }
+                }
+            }
+        }
+        .sheet(isPresented: $viewModel.showingCamera) {
+            CameraView { image in
+                viewModel.selectedImage = image
+            }
+        }
+        .actionSheet(isPresented: $viewModel.showingImageOptions) {
+            ActionSheet(
+                title: Text("Add Recipe Photo"),
+                message: Text("Choose how you'd like to add a photo"),
+                buttons: [
+                    .default(Text("Take Photo")) {
+                        viewModel.takePhoto()
+                    },
+                    .default(Text("Choose from Library")) {
+                        viewModel.selectFromLibrary()
+                    },
+                    .cancel()
+                ]
+            )
         }
     }
     
