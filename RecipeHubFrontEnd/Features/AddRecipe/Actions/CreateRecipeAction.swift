@@ -31,24 +31,55 @@ struct CreateRecipeAction {
         
         print("Making request to: \(url)")
         
+        // Generate boundary string
+        let boundary = "Boundary-\(UUID().uuidString)"
+        
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
-        do {
-            let jsonData = try JSONEncoder().encode(parameters)
-            request.httpBody = jsonData
-            
-            if let bodyString = String(data: jsonData, encoding: .utf8) {
-                print("Request body: \(bodyString)")
-            }
-        } catch {
-            print("Encoding error: \(error)")
-            completion(nil)
-            return
+        // Create multipart form data
+        var body = Data()
+        
+        // Function to add text field
+        func addFormField(named name: String, value: String) {
+            body.append("--\(boundary)\r\n".data(using: .utf8)!)
+            body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
+            body.append("\(value)\r\n".data(using: .utf8)!)
         }
         
+        // Add text fields
+        addFormField(named: "title", value: parameters.title)
+        addFormField(named: "description", value: parameters.description)
+        
+        // Convert ingredients to JSON string
+        if let ingredientsData = try? JSONEncoder().encode(parameters.ingredients),
+           let ingredientsString = String(data: ingredientsData, encoding: .utf8) {
+            addFormField(named: "ingredients", value: ingredientsString)
+        }
+        
+        // Convert instructions to JSON string
+        if let instructionsData = try? JSONEncoder().encode(parameters.instructions),
+           let instructionsString = String(data: instructionsData, encoding: .utf8) {
+            addFormField(named: "instructions", value: instructionsString)
+        }
+        
+        addFormField(named: "isPublic", value: parameters.isPublic.description)
+        addFormField(named: "cooked", value: parameters.cooked.description)
+        addFormField(named: "favourite", value: parameters.favourite.description)
+        addFormField(named: "authorId", value: String(parameters.authorId))
+        
+        if let originalRecipeId = parameters.originalRecipeId {
+            addFormField(named: "originalRecipeId", value: String(originalRecipeId))
+        }
+        
+        // Add final boundary
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        request.httpBody = body
+        
         print("Starting network request for creating recipe...")
+        print("Request body length: \(body.count) bytes")
         
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -71,6 +102,9 @@ struct CreateRecipeAction {
             
             if httpResponse.statusCode != 201 && httpResponse.statusCode != 200 {
                 print("Failed to create recipe with status code: \(httpResponse.statusCode)")
+                if let data = data, let errorString = String(data: data, encoding: .utf8) {
+                    print("Error response: \(errorString)")
+                }
                 DispatchQueue.main.async {
                     completion(nil)
                 }
@@ -121,4 +155,4 @@ struct CreateRecipeAction {
         
         task.resume()
     }
-} 
+}
