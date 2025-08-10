@@ -9,6 +9,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
+    @State private var showingEditProfile = false
     
     var body: some View {
         NavigationView {
@@ -20,7 +21,7 @@ struct SettingsView: View {
                     VStack(spacing: 24) {
                         // User Profile Section
                         VStack(spacing: 16) {
-                            Text("👤 Profile")
+                            Text("Profile")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.purple)
@@ -45,51 +46,16 @@ struct SettingsView: View {
                                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                             }
                         }
-                        
-                        // App Settings Section
-                        VStack(spacing: 16) {
-                            Text("⚙️ Settings")
-                                .font(.title2)
-                                .fontWeight(.bold)
-                                .foregroundColor(.purple)
-                            
-                            VStack(spacing: 8) {
-                                SettingsRowView(
-                                    icon: "bell",
-                                    title: "Notifications",
-                                    subtitle: "Manage notification preferences"
-                                )
-                                
-                                SettingsRowView(
-                                    icon: "lock",
-                                    title: "Privacy",
-                                    subtitle: "Control your privacy settings"
-                                )
-                                
-                                SettingsRowView(
-                                    icon: "questionmark.circle",
-                                    title: "Help & Support",
-                                    subtitle: "Get help and contact support"
-                                )
-                                
-                                SettingsRowView(
-                                    icon: "info.circle",
-                                    title: "About",
-                                    subtitle: "App version and information"
-                                )
-                            }
-                        }
-                        
                         // Account Actions Section
                         VStack(spacing: 16) {
-                            Text("🔐 Account")
+                            Text("Account")
                                 .font(.title2)
                                 .fontWeight(.bold)
                                 .foregroundColor(.purple)
                             
                             VStack(spacing: 8) {
                                 Button(action: {
-                                    // TODO: Implement edit profile
+                                    showingEditProfile = true
                                 }) {
                                     SettingsRowView(
                                         icon: "person.circle",
@@ -117,6 +83,9 @@ struct SettingsView: View {
                 }
             }
             .navigationTitle("Settings")
+            .sheet(isPresented: $showingEditProfile) {
+                EditProfileView()
+            }
         }
     }
     

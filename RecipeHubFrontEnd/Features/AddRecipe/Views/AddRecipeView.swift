@@ -249,15 +249,6 @@ struct AddRecipeView: View {
             }
             .navigationTitle(viewModel.navigationTitle)
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("Cancel") {
-                        dismiss()
-                    }
-                    .foregroundColor(.purple)
-                    .disabled(viewModel.isLoading)
-                }
-            }
         }
         .alert("Recipe Created!", isPresented: $viewModel.isRecipeCreated) {
             Button("OK") {
