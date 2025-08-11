@@ -10,9 +10,20 @@ import SwiftUI
 struct RecipeDetailView: View {
     @ObservedObject var viewModel: RecipeDetailViewModel
     @State private var showingForkSheet = false
+    @State private var showingEditSheet = false
+    @State private var showingDeleteAlert = false
     @EnvironmentObject var authViewModel: AuthViewModel
+    let onRecipeDeleted: (() -> Void)?
     
-    var body: some View {
+    init(viewModel: RecipeDetailViewModel, onRecipeDeleted: (() -> Void)? = nil) {
+        self.viewModel = viewModel
+        self.onRecipeDeleted = onRecipeDeleted
+    }
+    
+    // MARK: - Computed Properties
+    
+    @ViewBuilder
+    private var mainContentView: some View {
         ZStack {
             Color(red: 1.0, green: 0.95, blue: 0.97)
                 .ignoresSafeArea()
@@ -76,22 +87,63 @@ struct RecipeDetailView: View {
                             
                             Spacer()
                             
-                            // Fork button (only show if recipe is not by current user)
-                            if let currentUserId = authViewModel.getCurrentUserId(), currentUserId != viewModel.recipe.authorId {
-                                Button(action: {
-                                    showingForkSheet = true
-                                }) {
-                                    HStack(spacing: 4) {
-                                        Image(systemName: "arrow.triangle.branch")
-                                            .foregroundColor(.purple)
-                                        Text("Fork")
-                                            .font(.caption)
-                                            .foregroundColor(.purple)
+                            // Action buttons
+                            if let currentUserId = authViewModel.getCurrentUserId() {
+                                if currentUserId == viewModel.recipe.authorId {
+                                    // Author buttons
+                                    HStack(spacing: 8) {
+                                        // Edit button
+                                        Button(action: {
+                                            showingEditSheet = true
+                                        }) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "pencil")
+                                                    .foregroundColor(.purple)
+                                                Text("Edit")
+                                                    .font(.caption)
+                                                    .foregroundColor(.purple)
+                                            }
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.purple.opacity(0.1))
+                                            .cornerRadius(20)
+                                        }
+                                        
+                                        // Delete button
+                                        Button(action: {
+                                            showingDeleteAlert = true
+                                        }) {
+                                            HStack(spacing: 4) {
+                                                Image(systemName: "trash")
+                                                    .foregroundColor(.red)
+                                                Text("Delete")
+                                                    .font(.caption)
+                                                    .foregroundColor(.red)
+                                            }
+                                            .padding(.horizontal, 12)
+                                            .padding(.vertical, 6)
+                                            .background(Color.red.opacity(0.1))
+                                            .cornerRadius(20)
+                                        }
+                                        .disabled(viewModel.isDeleting)
                                     }
-                                    .padding(.horizontal, 12)
-                                    .padding(.vertical, 6)
-                                    .background(Color.purple.opacity(0.1))
-                                    .cornerRadius(20)
+                                } else {
+                                    // Non-author button
+                                    Button(action: {
+                                        showingForkSheet = true
+                                    }) {
+                                        HStack(spacing: 4) {
+                                            Image(systemName: "arrow.triangle.branch")
+                                                .foregroundColor(.purple)
+                                            Text("Fork")
+                                                .font(.caption)
+                                                .foregroundColor(.purple)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 6)
+                                        .background(Color.purple.opacity(0.1))
+                                        .cornerRadius(20)
+                                    }
                                 }
                             }
                         }
@@ -192,13 +244,54 @@ struct RecipeDetailView: View {
                 .padding()
             }
         }
-        .navigationTitle("Recipe Details")
-        .navigationBarTitleDisplayMode(.inline)
-        .sheet(isPresented: $showingForkSheet) {
-            AddRecipeView(recipeToFork: viewModel.recipe)
+    }
+    
+    var body: some View {
+        mainContentView
+            .navigationTitle("Recipe Details")
+            .navigationBarTitleDisplayMode(.inline)
+            .sheet(isPresented: $showingForkSheet) {
+                AddRecipeView(recipeToFork: viewModel.recipe)
+            }
+            .sheet(isPresented: $showingEditSheet) {
+                EditRecipeView(recipe: viewModel.recipe, authorId: viewModel.recipe.authorId) { updatedRecipe in
+                    viewModel.updateRecipe(updatedRecipe)
+                }
+            }
+            .alert("Delete Recipe", isPresented: $showingDeleteAlert) {
+                Button("Cancel", role: .cancel) { }
+                Button("Delete", role: .destructive) {
+                    deleteRecipe()
+                }
+            } message: {
+                Text("Are you sure you want to delete '\(viewModel.recipe.title)'? This action cannot be undone.")
+            }
+            .overlay(
+                Group {
+                    if viewModel.isDeleting {
+                        ProgressView()
+                            .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                            .scaleEffect(0.8)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            .background(Color.black.opacity(0.3))
+                            .cornerRadius(16)
+                    }
+                }
+            )
+    }
+    
+    private func deleteRecipe() {
+        viewModel.deleteRecipe { success in
+            if success {
+                print("Recipe deleted successfully")
+                onRecipeDeleted?()
+            } else {
+                print("Failed to delete recipe")
+            }
         }
     }
 }
+
 #Preview {
-    RecipeDetailView(viewModel: .init(recipe: .sample))
+    RecipeDetailView(viewModel: .init(recipe: .sample), onRecipeDeleted: nil)
 }
