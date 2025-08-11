@@ -12,7 +12,9 @@ struct RecipeDetailView: View {
     @State private var showingForkSheet = false
     @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
+    @State private var shouldNavigateToHome = false
     @EnvironmentObject var authViewModel: AuthViewModel
+    @Environment(\.dismiss) private var dismiss
     let onRecipeDeleted: (() -> Void)?
     
     init(viewModel: RecipeDetailViewModel, onRecipeDeleted: (() -> Void)? = nil) {
@@ -285,6 +287,8 @@ struct RecipeDetailView: View {
             if success {
                 print("Recipe deleted successfully")
                 onRecipeDeleted?()
+                // Navigate back to home screen
+                dismiss()
             } else {
                 print("Failed to delete recipe")
             }
