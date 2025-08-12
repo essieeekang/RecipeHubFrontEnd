@@ -1,35 +1,15 @@
-//
-//  LoginActions.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct LoginAction {
     var request: LoginRequest
     
     func call(completion: @escaping (LoginResponse?) -> Void) {
-        let scheme: String = "http"
-        let host: String = "192.168.0.166"
-        let port: Int = 8080
-        let path = "/api/auth/login"
-
-        var components = URLComponents()
-        components.scheme = scheme
-        components.host = host
-        components.path = path
-        components.port = port
-
-        guard let url = components.url else {
-            print("Failed to create URL")
+        guard let url = APIConfig.authLoginURL() else {
+            print("Failed to create URL for user login")
             completion(nil)
             return
         }
         
-        print("Making request to: \(url)")
-
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
 
@@ -64,7 +44,6 @@ struct LoginAction {
                 return
             }
             
-            print("Status code: \(httpResponse.statusCode)")
             if httpResponse.statusCode != 200 {
                 print("Login failed with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -87,21 +66,16 @@ struct LoginAction {
 
             do {
                 let response = try JSONDecoder().decode(LoginResponse.self, from: data)
-                print("Login successful, response: \(response)")
-                print("User ID: \(response.user.id), Username: \(response.user.username)")
                 DispatchQueue.main.async {
                     completion(response)
                 }
             } catch {
                 print("Decoding error: \(error)")
-                print("Error details: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     completion(nil)
                 }
             }
         }
-
-        print("Starting network request...")
         task.resume()
     }
 }

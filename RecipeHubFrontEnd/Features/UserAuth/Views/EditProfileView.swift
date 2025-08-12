@@ -28,7 +28,6 @@ struct EditProfileView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Profile Header
                         VStack(spacing: 12) {
                             Image(systemName: "person.circle.fill")
                                 .font(.system(size: 80))
@@ -46,7 +45,6 @@ struct EditProfileView: View {
                         }
                         .padding(.top)
                         
-                        // Username Section
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Username")
                                 .font(.headline)
@@ -58,7 +56,6 @@ struct EditProfileView: View {
                                 .textInputAutocapitalization(.never)
                         }
                         
-                        // Email Section
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Email")
                                 .font(.headline)
@@ -71,14 +68,12 @@ struct EditProfileView: View {
                                 .keyboardType(.emailAddress)
                         }
                         
-                        // Password Change Section
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Change Password")
                                 .font(.headline)
                                 .foregroundColor(.purple)
                             
                             VStack(spacing: 12) {
-                                // Current Password
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Current Password")
                                         .font(.subheadline)
@@ -89,8 +84,7 @@ struct EditProfileView: View {
                                         .disabled(isLoading)
                                         .textInputAutocapitalization(.never)
                                 }
-                                
-                                // New Password
+
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("New Password")
                                         .font(.subheadline)
@@ -102,7 +96,6 @@ struct EditProfileView: View {
                                         .textInputAutocapitalization(.never)
                                 }
                                 
-                                // Confirm Password
                                 VStack(alignment: .leading, spacing: 4) {
                                     Text("Confirm New Password")
                                         .font(.subheadline)
@@ -119,7 +112,6 @@ struct EditProfileView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Error Message
                         if !errorMessage.isEmpty {
                             Text(errorMessage)
                                 .foregroundColor(.red)
@@ -129,7 +121,6 @@ struct EditProfileView: View {
                                 .cornerRadius(8)
                         }
                         
-                        // Update Profile Button
                         Button(action: updateProfile) {
                             HStack {
                                 if isLoading {
@@ -178,11 +169,9 @@ struct EditProfileView: View {
     }
     
     private var canSubmit: Bool {
-        // Must have at least one field to update
         let hasChanges = !username.isEmpty || !email.isEmpty || !newPassword.isEmpty
         
-        // If changing password, must have current password and matching new passwords
-        let passwordValid = newPassword.isEmpty || 
+        let passwordValid = newPassword.isEmpty ||
             (!currentPassword.isEmpty && newPassword == confirmPassword && newPassword.count >= 6)
         
         return hasChanges && passwordValid && !isLoading
@@ -216,7 +205,6 @@ struct EditProfileView: View {
         isLoading = true
         errorMessage = ""
         
-        // Prepare update parameters (only include non-empty fields)
         let updateUsername = username.isEmpty ? nil : username
         let updateEmail = email.isEmpty ? nil : email
         let updateCurrentPassword = currentPassword.isEmpty ? nil : currentPassword
@@ -232,7 +220,6 @@ struct EditProfileView: View {
             
             if success {
                 isProfileUpdated = true
-                // Clear sensitive fields
                 currentPassword = ""
                 newPassword = ""
                 confirmPassword = ""
@@ -242,8 +229,3 @@ struct EditProfileView: View {
         }
     }
 }
-
-#Preview {
-    EditProfileView()
-        .environmentObject(AuthViewModel())
-} 

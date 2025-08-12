@@ -5,6 +5,10 @@ struct APIConfig {
     static let productionBaseURL = "https://back-end-recipe-hub.onrender.com"
     
     struct Endpoints {
+        // Authentication endpoints
+        static let authRegister = "/api/auth/register"
+        static let authLogin = "/api/auth/login"
+        
         // User endpoints
         static let users = "/api/users"
         static let userRecipes = "/api/users/{userId}/recipes"
@@ -79,6 +83,15 @@ struct APIConfig {
     
     static func userURL(userId: String) -> URL? {
         return buildURL(for: Endpoints.users + "/{userId}", pathParameters: ["userId": userId])
+    }
+    
+    // MARK: - Authentication URL Builders
+    static func authRegisterURL() -> URL? {
+        return buildURL(for: Endpoints.authRegister)
+    }
+    
+    static func authLoginURL() -> URL? {
+        return buildURL(for: Endpoints.authLogin)
     }
 }
 

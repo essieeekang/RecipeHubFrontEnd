@@ -1,10 +1,3 @@
-//
-//  AddUserView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct AddUserView: View {
@@ -58,8 +51,6 @@ struct AddUserView: View {
                     print("Password: \(authViewModel.password)")
                     authViewModel.addUser {
                         print("Add user completion handler called")
-                        // Navigation is handled automatically by RootView
-                        // when isLoggedIn becomes true
                     }
                 }
                 .buttonStyle(FilledButtonStyle())
@@ -79,12 +70,5 @@ struct AddUserView: View {
             }
             .padding()
         }
-    }
-}
-
-struct AddUserScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        AddUserView(onBack: {})
-            .environmentObject(AuthViewModel())
     }
 }

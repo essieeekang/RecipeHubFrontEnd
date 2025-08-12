@@ -1,10 +1,3 @@
-//
-//  WelcomeView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct WelcomeView: View {
@@ -39,9 +32,7 @@ struct WelcomeView: View {
             }
         }
         .onChange(of: authViewModel.isLoggedIn) { _, newValue in
-            print("WelcomeView: isLoggedIn changed to \(newValue)")
             if newValue {
-                // Reset to welcome when user logs in
                 currentView = .welcome
             }
         }
@@ -53,7 +44,7 @@ struct WelcomeView: View {
                 .ignoresSafeArea()
 
             VStack(spacing: 40) {
-                Text("RecipeHub")
+                Text("Recipe Hub")
                     .font(.system(size: 40, weight: .bold))
                     .foregroundColor(.purple)
 
@@ -78,8 +69,4 @@ struct WelcomeView: View {
             .padding()
         }
     }
-}
-
-#Preview {
-    WelcomeView()
 }

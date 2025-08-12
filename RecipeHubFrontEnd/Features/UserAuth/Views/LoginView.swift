@@ -1,10 +1,3 @@
-//
-//  LoginView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct LoginView: View {
@@ -48,8 +41,6 @@ struct LoginView: View {
                     print("Username: \(authViewModel.username)")
                     print("Password: \(authViewModel.password)")
                     authViewModel.login()
-                    // Navigation is handled automatically by RootView
-                    // when isLoggedIn becomes true
                 }
                 .buttonStyle(FilledButtonStyle())
                 .disabled(authViewModel.isLoading)
@@ -68,12 +59,5 @@ struct LoginView: View {
             }
             .padding()
         }
-    }
-}
-
-struct LoginScreen_Previews: PreviewProvider {
-    static var previews: some View {
-        LoginView(onBack: {})
-            .environmentObject(AuthViewModel())
     }
 }
