@@ -1,10 +1,3 @@
-//
-//  RecipeDetailView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 8/1/25.
-//
-
 import SwiftUI
 
 struct RecipeDetailView: View {

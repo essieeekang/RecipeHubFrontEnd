@@ -1,10 +1,3 @@
-//
-//  CreateRecipeAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct CreateRecipeRequest: Codable {
@@ -31,35 +24,28 @@ struct CreateRecipeAction {
             return
         }
         
-        print("Making request to: \(url)")
-        // Generate boundary string
         let boundary = "Boundary-\(UUID().uuidString)"
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
-        // Create multipart form data
         var body = Data()
         
-        // Function to add text field
         func addFormField(named name: String, value: String) {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"\(name)\"\r\n\r\n".data(using: .utf8)!)
             body.append("\(value)\r\n".data(using: .utf8)!)
         }
         
-        // Add text fields
         addFormField(named: "title", value: parameters.title)
         addFormField(named: "description", value: parameters.description)
         
-        // Convert ingredients to JSON string
         if let ingredientsData = try? JSONEncoder().encode(parameters.ingredients),
            let ingredientsString = String(data: ingredientsData, encoding: .utf8) {
             addFormField(named: "ingredients", value: ingredientsString)
         }
         
-        // Convert instructions to JSON string
         if let instructionsData = try? JSONEncoder().encode(parameters.instructions),
            let instructionsString = String(data: instructionsData, encoding: .utf8) {
             addFormField(named: "instructions", value: instructionsString)
@@ -74,7 +60,6 @@ struct CreateRecipeAction {
             addFormField(named: "originalRecipeId", value: String(originalRecipeId))
         }
         
-        // Add image file if provided
         if let imageData = parameters.imageData, let fileName = parameters.imageFileName {
             body.append("--\(boundary)\r\n".data(using: .utf8)!)
             body.append("Content-Disposition: form-data; name=\"file\"; filename=\"\(fileName)\"\r\n".data(using: .utf8)!)
@@ -83,14 +68,10 @@ struct CreateRecipeAction {
             body.append("\r\n".data(using: .utf8)!)
         }
         
-        // Add final boundary
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
         
         request.httpBody = body
-        
-        print("Starting network request for creating recipe...")
-        print("Request body length: \(body.count) bytes")
-        
+
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -107,9 +88,7 @@ struct CreateRecipeAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 201 && httpResponse.statusCode != 200 {
                 print("Failed to create recipe with status code: \(httpResponse.statusCode)")
                 if let data = data, let errorString = String(data: data, encoding: .utf8) {
@@ -129,14 +108,8 @@ struct CreateRecipeAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-            }
-            
             do {
                 let recipe = try JSONDecoder().decode(Recipe.self, from: data)
-                print("Successfully created recipe with ID: \(recipe.id)")
-                print("Recipe details: title=\(recipe.title), originalRecipeId=\(recipe.originalRecipeId?.description ?? "nil")")
                 DispatchQueue.main.async {
                     completion(recipe)
                 }

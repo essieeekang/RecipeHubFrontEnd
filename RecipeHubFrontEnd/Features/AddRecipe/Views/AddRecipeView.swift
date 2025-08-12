@@ -1,10 +1,3 @@
-//
-//  AddRecipeView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 import PhotosUI
 
@@ -308,11 +301,4 @@ struct AddRecipeView: View {
             }
         }
     }
-}
-
-
-
-#Preview {
-    AddRecipeView()
-        .environmentObject(AuthViewModel())
 }
