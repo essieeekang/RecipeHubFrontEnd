@@ -4,7 +4,7 @@ struct GetFavoriteRecipesAction {
     let userId: Int
     
     func call(completion: @escaping ([Recipe]) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/users/\(userId)/recipes/favourite") else {
+        guard let url = APIConfig.userFavoriteRecipesURL(userId: String(userId)) else {
             print("Failed to create URL for favorite recipes")
             completion([])
             return

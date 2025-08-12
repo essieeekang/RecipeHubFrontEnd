@@ -24,7 +24,7 @@ struct ForkRecipeAction {
     let parameters: ForkRecipeRequest
     
     func call(completion: @escaping (Recipe?) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/recipes/\(recipeId)/fork") else {
+        guard let url = APIConfig.forkRecipeURL(recipeId: String(recipeId)) else {
             print("Failed to create URL for forking recipe")
             completion(nil)
             return

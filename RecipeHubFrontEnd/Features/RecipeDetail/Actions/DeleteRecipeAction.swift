@@ -11,7 +11,7 @@ struct DeleteRecipeAction {
     let recipeId: Int
     
     func call(completion: @escaping (Bool) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/recipes/\(recipeId)") else {
+        guard let url = APIConfig.recipeURL(recipeId: String(recipeId)) else {
             print("Failed to create URL for deleting recipe")
             DispatchQueue.main.async {
                 completion(false)

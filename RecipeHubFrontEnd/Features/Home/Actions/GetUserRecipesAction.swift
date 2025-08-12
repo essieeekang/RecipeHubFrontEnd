@@ -11,7 +11,7 @@ struct GetUserRecipesAction {
     let userId: Int
     
     func call(completion: @escaping ([Recipe]) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/users/\(userId)/recipes") else {
+        guard let url = APIConfig.userRecipesURL(userId: String(userId)) else {
             print("Failed to create URL for user recipes")
             completion([])
             return

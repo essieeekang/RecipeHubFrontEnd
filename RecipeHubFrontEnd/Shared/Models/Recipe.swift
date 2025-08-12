@@ -1,3 +1,10 @@
+//
+//  Recipe.swift
+//  RecipeHubFrontEnd
+//
+//  Created by Esther Kang on 7/31/25.
+//
+
 import Foundation
 
 struct RecipeResponse: Decodable {
@@ -22,10 +29,12 @@ struct Recipe: Codable, Identifiable {
     let createdAt: Date
     let updatedAt: Date
     
+    // Coding keys for proper encoding/decoding
     enum CodingKeys: String, CodingKey {
         case id, title, description, ingredients, instructions, imageUrl, isPublic, cooked, favourite, likeCount, authorId, authorUsername, originalRecipeId, tags, createdAt, updatedAt
     }
     
+    // Custom initializer for decoding
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decode(Int.self, forKey: .id)
@@ -58,6 +67,7 @@ struct Recipe: Codable, Identifiable {
         }
     }
     
+    // Custom initializer for creating new recipes
     init(id: Int, title: String, description: String, ingredients: [Ingredient], instructions: [String], imageUrl: String?, isPublic: Bool, cooked: Bool, favourite: Bool, likeCount: Int, authorId: Int, authorUsername: String, originalRecipeId: Int?, tags: [String]?, createdAt: Date, updatedAt: Date) {
         self.id = id
         self.title = title
@@ -77,6 +87,7 @@ struct Recipe: Codable, Identifiable {
         self.updatedAt = updatedAt
     }
     
+    // Custom encoding function
     func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(id, forKey: .id)

@@ -278,3 +278,9 @@ struct AddRecipeToBookView: View {
         }
     }
 }
+
+#Preview {
+    NavigationView {
+        BookDetailView(book: RecipeBook.sample, viewModel: RecipeBooksViewModel())
+    }
+} 

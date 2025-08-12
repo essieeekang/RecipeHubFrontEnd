@@ -19,7 +19,7 @@ struct UpdateRecipeBookAction {
     let parameters: UpdateRecipeBookRequest
     
     func call(completion: @escaping (RecipeBook?) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/recipebooks/\(bookId)") else {
+        guard let url = APIConfig.recipeBookURL(bookId: String(bookId)) else {
             print("Failed to create URL for updating recipe book")
             completion(nil)
             return
