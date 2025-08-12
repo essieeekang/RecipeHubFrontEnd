@@ -5,7 +5,53 @@
 //  Created by Esther Kang on 7/31/25.
 //
 
+import Foundation
 import SwiftUI
+
+// Global singleton to hold recipe data that survives SwiftUI view recreation
+class GlobalRecipeHolder: ObservableObject {
+    static let shared = GlobalRecipeHolder()
+    
+    @Published var currentOriginalRecipe: Recipe?
+    @Published var currentOriginalError: String?
+    @Published var currentOriginalLoading: Bool = false
+    
+    private init() {}
+    
+    func setRecipe(_ recipe: Recipe) {
+        DispatchQueue.main.async {
+            self.currentOriginalRecipe = recipe
+            self.currentOriginalError = nil
+            self.currentOriginalLoading = false
+            print("🔧 GlobalRecipeHolder: Set recipe - \(recipe.title)")
+        }
+    }
+    
+    func setError(_ error: String) {
+        DispatchQueue.main.async {
+            self.currentOriginalRecipe = nil
+            self.currentOriginalError = error
+            self.currentOriginalLoading = false
+            print("🔧 GlobalRecipeHolder: Set error - \(error)")
+        }
+    }
+    
+    func setLoading(_ loading: Bool) {
+        DispatchQueue.main.async {
+            self.currentOriginalLoading = loading
+            print("🔧 GlobalRecipeHolder: Set loading - \(loading)")
+        }
+    }
+    
+    func clear() {
+        DispatchQueue.main.async {
+            self.currentOriginalRecipe = nil
+            self.currentOriginalError = nil
+            self.currentOriginalLoading = false
+            print("🔧 GlobalRecipeHolder: Cleared all data")
+        }
+    }
+}
 
 extension Color {
     init(hex: String) {

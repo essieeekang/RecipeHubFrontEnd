@@ -13,6 +13,82 @@ struct RecipeDetailView: View {
     @State private var showingEditSheet = false
     @State private var showingDeleteAlert = false
     @State private var shouldNavigateToHome = false
+    @State private var showingOriginalRecipe = false
+    @State private var originalRecipe: Recipe?
+    @State private var isLoadingOriginalRecipe = false
+    @State private var originalRecipeError: String?
+    @State private var originalRecipeId: Int?
+    
+    // Store the data we want to show in the sheet
+    @State private var sheetData: SheetData?
+    
+    // Struct to hold sheet data
+    private struct SheetData {
+        let recipe: Recipe?
+        let error: String?
+        let isLoading: Bool
+    }
+    
+    // Alternative approach: store the data in a more stable way
+    @State private var currentSheetRecipe: Recipe?
+    @State private var currentSheetError: String?
+    @State private var currentSheetLoading: Bool = false
+    
+    // Final approach: use a closure-based sheet with direct data passing
+    @State private var sheetContent: SheetContent?
+    
+    // Enum to represent what should be shown in the sheet
+    private enum SheetContent {
+        case loading
+        case recipe(Recipe)
+        case error(String)
+        
+        var recipe: Recipe? {
+            switch self {
+            case .recipe(let recipe): return recipe
+            default: return nil
+            }
+        }
+        
+        var error: String? {
+            switch self {
+            case .error(let error): return error
+            default: return nil
+            }
+        }
+        
+        var isLoading: Bool {
+            switch self {
+            case .loading: return true
+            default: return false
+            }
+        }
+    }
+    
+    // Alternative approach: store the actual data directly in the view
+    @State private var capturedRecipe: Recipe?
+    @State private var capturedError: String?
+    @State private var capturedLoading: Bool = false
+    
+    // Final approach: use a closure-based sheet that captures data directly
+    @State private var originalRecipeData: (recipe: Recipe?, error: String?, isLoading: Bool) = (nil, nil, false)
+    
+    // Alternative approach: use a more persistent data store
+    @State private var persistentRecipe: Recipe?
+    @State private var persistentError: String?
+    @State private var persistentLoading: Bool = false
+    
+    // Final approach: use a closure-based sheet that captures data directly
+    @State private var sheetRecipe: Recipe?
+    @State private var sheetError: String?
+    @State private var sheetLoading: Bool = false
+    
+
+    
+    // Global state approach: use a singleton that survives view recreation
+    @StateObject private var globalRecipeHolder = GlobalRecipeHolder.shared
+    
+
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     let onRecipeDeleted: (() -> Void)?
@@ -76,9 +152,16 @@ struct RecipeDetailView: View {
                                                 .foregroundColor(.purple)
                                         }
                                         
-                                        Text("Original Recipe ID: #\(originalRecipeId)")
-                                            .font(.caption2)
-                                            .foregroundColor(.gray)
+                                        Button(action: {
+                                            // Navigate to original recipe
+                                            navigateToOriginalRecipe(originalRecipeId)
+                                        }) {
+                                            Text("Original Recipe ID: #\(originalRecipeId)")
+                                                .font(.caption2)
+                                                .foregroundColor(.blue)
+                                                .underline()
+                                        }
+                                        .buttonStyle(PlainButtonStyle())
                                         
                                         Text("Forked by: \(viewModel.recipe.authorUsername)")
                                             .font(.caption2)
@@ -260,6 +343,109 @@ struct RecipeDetailView: View {
                     viewModel.updateRecipe(updatedRecipe)
                 }
             }
+                        .sheet(isPresented: $showingOriginalRecipe) {
+                Group {
+                    let _ = print("🔍 Sheet content evaluation:")
+                    let _ = print("   - globalLoading: \(globalRecipeHolder.currentOriginalLoading)")
+                    let _ = print("   - globalRecipe: \(globalRecipeHolder.currentOriginalRecipe != nil ? "exists" : "nil")")
+                    let _ = print("   - globalError: \(globalRecipeHolder.currentOriginalError ?? "nil")")
+                    
+                    // Use global state that survives view recreation
+                    if globalRecipeHolder.currentOriginalLoading {
+                        VStack(spacing: 20) {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .purple))
+                                .scaleEffect(1.2)
+                            
+                            Text("Loading original recipe...")
+                                .font(.headline)
+                                .foregroundColor(.purple)
+                            
+                            Text("Debug: Using global loading state")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(red: 1.0, green: 0.95, blue: 0.97))
+                        
+                    } else if let recipe = globalRecipeHolder.currentOriginalRecipe {
+                        VStack {
+                            RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))
+                            
+                            Button("Close") {
+                                showingOriginalRecipe = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.purple)
+                            .padding()
+                        }
+                        
+                    } else if let error = globalRecipeHolder.currentOriginalError {
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.orange)
+                            
+                            Text("Recipe Not Found")
+                                .font(.headline)
+                                .foregroundColor(.gray)
+                            
+                            Text(error)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                            
+                            Text("Debug: Using global error state")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            Button("Close") {
+                                showingOriginalRecipe = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.purple)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(red: 1.0, green: 0.95, blue: 0.97))
+                        
+                    } else {
+                        // No data available - show debug info
+                        VStack(spacing: 20) {
+                            Image(systemName: "exclamationmark.triangle")
+                                .font(.system(size: 48))
+                                .foregroundColor(.red)
+                            
+                            Text("No Data Available")
+                                .font(.headline)
+                                .foregroundColor(.red)
+                            
+                            Text("Debug: Global state is empty")
+                                .font(.caption)
+                                .foregroundColor(.gray)
+                            
+                            VStack(alignment: .leading, spacing: 8) {
+                                Text("globalLoading: \(globalRecipeHolder.currentOriginalLoading)")
+                                Text("globalRecipe: \(globalRecipeHolder.currentOriginalRecipe != nil ? "exists" : "nil")")
+                                Text("globalError: \(globalRecipeHolder.currentOriginalError ?? "nil")")
+                            }
+                            .font(.caption2)
+                            .foregroundColor(.gray)
+                            .padding()
+                            .background(Color.gray.opacity(0.0))
+                            .cornerRadius(8)
+                            
+                            Button("Close") {
+                                showingOriginalRecipe = false
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.red)
+                        }
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        .background(Color(red: 1.0, green: 0.95, blue: 0.97))
+                    }
+                }
+            }
             .alert("Delete Recipe", isPresented: $showingDeleteAlert) {
                 Button("Cancel", role: .cancel) { }
                 Button("Delete", role: .destructive) {
@@ -291,6 +477,189 @@ struct RecipeDetailView: View {
                 dismiss()
             } else {
                 print("Failed to delete recipe")
+            }
+        }
+    }
+    
+    private func navigateToOriginalRecipe(_ recipeId: Int) {
+        // Fetch the original recipe and show it
+        fetchOriginalRecipe(recipeId: recipeId)
+    }
+    
+    private func fetchOriginalRecipe(recipeId: Int) {
+        print("🚀 fetchOriginalRecipe called with ID: \(recipeId)")
+        isLoadingOriginalRecipe = true
+        originalRecipeError = nil
+        originalRecipe = nil  // Clear any previous recipe
+        originalRecipeId = recipeId  // Store the ID for reference
+        
+        print("📱 State before API call:")
+        print("   - isLoadingOriginalRecipe: \(isLoadingOriginalRecipe)")
+        print("   - originalRecipe: \(originalRecipe != nil ? "exists" : "nil")")
+        print("   - originalRecipeError: \(originalRecipeError ?? "nil")")
+        print("   - originalRecipeId: \(originalRecipeId ?? -1)")
+        
+        // Set global loading state
+        globalRecipeHolder.setLoading(true)
+        sheetRecipe = nil
+        sheetError = nil
+        
+
+        
+        GetRecipeByIdAction(recipeId: recipeId).call { recipe in
+            print("📡 API response received:")
+            print("   - Recipe: \(recipe != nil ? "exists" : "nil")")
+            if let recipe = recipe {
+                print("   - Recipe title: \(recipe.title)")
+            }
+            
+            DispatchQueue.main.async {
+                print("🔄 Updating state on main thread...")
+                self.isLoadingOriginalRecipe = false
+                
+                if let recipe = recipe {
+                    self.originalRecipe = recipe
+                    print("✅ Successfully set originalRecipe")
+                    
+                    // Set sheet data with the recipe
+                    self.sheetData = SheetData(
+                        recipe: recipe,
+                        error: nil,
+                        isLoading: false
+                    )
+                    
+                    // Set alternative variables
+                    self.currentSheetRecipe = recipe
+                    self.currentSheetError = nil
+                    self.currentSheetLoading = false
+                    
+                    // Set the sheet content directly
+                    self.sheetContent = .recipe(recipe)
+                    
+                    // Set captured variables
+                    self.capturedRecipe = recipe
+                    self.capturedError = nil
+                    self.capturedLoading = false
+                    
+                    // Set the tuple data directly
+                    self.originalRecipeData = (recipe, nil, false)
+                    
+                    // Set persistent variables
+                    self.persistentRecipe = recipe
+                    self.persistentError = nil
+                    self.persistentLoading = false
+                    
+                    // Set sheet variables
+                    self.sheetRecipe = recipe
+                    self.sheetError = nil
+                    self.sheetLoading = false
+                    
+
+                    
+                    print("🔧 After setting sheet variables:")
+                    print("   - sheetRecipe: \(self.sheetRecipe != nil ? "exists" : "nil")")
+                    print("   - sheetError: \(self.sheetError ?? "nil")")
+                    print("   - sheetLoading: \(self.sheetLoading)")
+                    
+                    // Set global state that survives view recreation
+                    self.globalRecipeHolder.setRecipe(recipe)
+                    
+                    print("🔧 Set global state - recipe: \(recipe.title)")
+                } else {
+                    self.originalRecipeError = "Failed to fetch original recipe. It may have been deleted or is no longer available."
+                    print("❌ Set originalRecipeError")
+                    
+                    // Set sheet data with the error
+                    self.sheetData = SheetData(
+                        recipe: nil,
+                        error: self.originalRecipeError,
+                        isLoading: false
+                    )
+                    
+                    // Set alternative variables
+                    self.currentSheetRecipe = nil
+                    self.currentSheetError = self.originalRecipeError
+                    self.currentSheetLoading = false
+                    
+                    // Set the sheet content directly
+                    if let errorMessage = self.originalRecipeError {
+                        self.sheetContent = .error(errorMessage)
+                        
+                        // Set captured variables
+                        self.capturedRecipe = nil
+                        self.capturedError = errorMessage
+                        self.capturedLoading = false
+                        
+                        // Set the tuple data directly
+                        self.originalRecipeData = (nil, errorMessage, false)
+                        
+                        // Set persistent variables
+                        self.persistentRecipe = nil
+                        self.persistentError = errorMessage
+                        self.persistentLoading = false
+                        
+                        // Set sheet variables
+                        self.sheetRecipe = nil
+                        self.sheetError = errorMessage
+                        self.sheetLoading = false
+                        
+                        // Set global state that survives view recreation
+                        self.globalRecipeHolder.setError(errorMessage)
+                        
+                        print("🔧 Set global state - error: \(errorMessage)")
+                        
+                    } else {
+                        // Fallback error message
+                        self.sheetContent = .error("Unknown error occurred")
+                        
+                        // Set captured variables
+                        self.capturedRecipe = nil
+                        self.capturedError = "Unknown error occurred"
+                        self.capturedLoading = false
+                        
+                        // Set the tuple data directly
+                        self.originalRecipeData = (nil, "Unknown error occurred", false)
+                        
+                        // Set persistent variables
+                        self.persistentRecipe = nil
+                        self.persistentError = "Unknown error occurred"
+                        self.persistentLoading = false
+                        
+                        // Set sheet variables
+                        self.sheetRecipe = nil
+                        self.sheetError = "Unknown error occurred"
+                        self.sheetLoading = false
+                        
+                        // Set global state that survives view recreation
+                        self.globalRecipeHolder.setError("Unknown error occurred")
+                        
+                        print("🔧 Set global state - fallback error")
+                    }
+                }
+                
+                print("📱 State after update:")
+                print("   - isLoadingOriginalRecipe: \(self.isLoadingOriginalRecipe)")
+                print("   - originalRecipe: \(self.originalRecipe != nil ? "exists" : "nil")")
+                print("   - originalRecipeError: \(self.originalRecipeError ?? "nil")")
+                print("   - originalRecipeId: \(self.originalRecipeId ?? -1)")
+                print("   - sheetData: \(self.sheetData != nil ? "exists" : "nil")")
+                
+                // Show sheet when we have global data
+                if self.globalRecipeHolder.currentOriginalRecipe != nil || self.globalRecipeHolder.currentOriginalError != nil {
+                    print("✅ Ready to show sheet - setting showingOriginalRecipe to true")
+                    
+                    print("🔧 Right before showing sheet:")
+                    print("   - globalRecipe: \(self.globalRecipeHolder.currentOriginalRecipe != nil ? "exists" : "nil")")
+                    print("   - globalError: \(self.globalRecipeHolder.currentOriginalError ?? "nil")")
+                    print("   - globalLoading: \(self.globalRecipeHolder.currentOriginalLoading)")
+                    
+                    // Add a small delay to ensure state is synchronized
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                        self.showingOriginalRecipe = true
+                    }
+                } else {
+                    print("❌ Not ready to show sheet - no global data")
+                }
             }
         }
     }
