@@ -23,12 +23,10 @@ struct APIConfig {
     static func buildURL(for endpoint: String, pathParameters: [String: String] = [:], queryParameters: [String: String] = [:]) -> URL? {
         var urlString = environmentBaseURL + endpoint
         
-        // Replace path parameters
         for (key, value) in pathParameters {
             urlString = urlString.replacingOccurrences(of: "{\(key)}", with: value)
         }
         
-        // Add query parameters
         if !queryParameters.isEmpty {
             let queryString = queryParameters
                 .map { "\($0.key)=\($0.value)" }
@@ -84,7 +82,6 @@ struct APIConfig {
     }
 }
 
-// MARK: - Environment Configuration
 extension APIConfig {
     enum Environment: String, CaseIterable {
         case development = "Development"
@@ -104,10 +101,8 @@ extension APIConfig {
         }
     }
     
-    // Change this to switch environments - this is for development purposes only
     static var currentEnvironment: Environment = .development
     
-    // Computed property that uses the current environment
     static var environmentBaseURL: String {
         return currentEnvironment.baseURL
     }

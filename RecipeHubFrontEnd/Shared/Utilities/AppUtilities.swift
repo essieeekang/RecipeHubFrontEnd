@@ -1,10 +1,3 @@
-//
-//  AppUtilities.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 import SwiftUI
 
@@ -23,7 +16,6 @@ class GlobalRecipeHolder: ObservableObject {
             self.currentOriginalRecipe = recipe
             self.currentOriginalError = nil
             self.currentOriginalLoading = false
-            print("🔧 GlobalRecipeHolder: Set recipe - \(recipe.title)")
         }
     }
     
@@ -32,14 +24,12 @@ class GlobalRecipeHolder: ObservableObject {
             self.currentOriginalRecipe = nil
             self.currentOriginalError = error
             self.currentOriginalLoading = false
-            print("🔧 GlobalRecipeHolder: Set error - \(error)")
         }
     }
     
     func setLoading(_ loading: Bool) {
         DispatchQueue.main.async {
             self.currentOriginalLoading = loading
-            print("🔧 GlobalRecipeHolder: Set loading - \(loading)")
         }
     }
     
@@ -48,7 +38,6 @@ class GlobalRecipeHolder: ObservableObject {
             self.currentOriginalRecipe = nil
             self.currentOriginalError = nil
             self.currentOriginalLoading = false
-            print("🔧 GlobalRecipeHolder: Cleared all data")
         }
     }
 }
