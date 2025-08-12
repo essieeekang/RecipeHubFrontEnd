@@ -25,14 +25,13 @@ struct CreateRecipeAction {
     let parameters: CreateRecipeRequest
     
     func call(completion: @escaping (Recipe?) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/recipes") else {
+        guard let url = APIConfig.recipesURL() else {
             print("Failed to create URL for creating recipe")
             completion(nil)
             return
         }
         
         print("Making request to: \(url)")
-        
         // Generate boundary string
         let boundary = "Boundary-\(UUID().uuidString)"
         

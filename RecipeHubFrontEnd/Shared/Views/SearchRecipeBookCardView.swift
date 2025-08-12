@@ -6,7 +6,6 @@ struct SearchRecipeBookCardView: View {
     var body: some View {
         NavigationLink(destination: SearchBookDetailView(recipeBook: recipeBook)) {
             VStack(alignment: .leading, spacing: 12) {
-                // Book name and privacy indicator
                 HStack {
                     Text(recipeBook.displayName)
                         .font(.title3)
@@ -16,7 +15,6 @@ struct SearchRecipeBookCardView: View {
                     
                     Spacer()
                     
-                    // Privacy indicator
                     HStack(spacing: 4) {
                         Image(systemName: recipeBook.isPublic ? "globe" : "lock")
                             .font(.caption)
@@ -28,13 +26,11 @@ struct SearchRecipeBookCardView: View {
                     }
                 }
                 
-                // Description
                 Text(recipeBook.description)
                     .font(.subheadline)
                     .foregroundColor(.secondary)
                     .lineLimit(2)
                 
-                // Recipe count
                 HStack(spacing: 4) {
                     Image(systemName: "doc.text")
                         .font(.caption)
@@ -45,7 +41,6 @@ struct SearchRecipeBookCardView: View {
                         .foregroundColor(.secondary)
                 }
                 
-                // Recipe preview dots (if any recipes)
                 if !recipeBook.recipeIds.isEmpty {
                     HStack(spacing: 4) {
                         ForEach(0..<min(3, recipeBook.recipeIds.count), id: \.self) { _ in
@@ -74,7 +69,3 @@ struct SearchRecipeBookCardView: View {
         )
     }
 }
-
-#Preview {
-    SearchRecipeBookCardView(recipeBook: RecipeBook.sample)
-} 

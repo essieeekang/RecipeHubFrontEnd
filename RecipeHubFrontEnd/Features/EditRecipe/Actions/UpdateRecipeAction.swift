@@ -19,7 +19,7 @@ struct UpdateRecipeAction {
     let parameters: UpdateRecipeRequest
     
     func call(completion: @escaping (Recipe?) -> Void) {
-        guard let url = URL(string: "http://192.168.0.166:8080/api/recipes/\(recipeId)") else {
+        guard let url = APIConfig.recipeURL(recipeId: String(recipeId)) else {
             print("Invalid URL for updating recipe")
             completion(nil)
             return

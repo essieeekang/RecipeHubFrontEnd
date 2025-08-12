@@ -1,10 +1,3 @@
-//
-//  RecipeBookCardView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct RecipeBookCardView: View {
@@ -16,7 +9,6 @@ struct RecipeBookCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Book name, privacy indicator, and action buttons
             HStack {
                 Text(book.displayName)
                     .font(.title3)
@@ -27,7 +19,6 @@ struct RecipeBookCardView: View {
                 Spacer()
                 
                 HStack(spacing: 8) {
-                    // Privacy indicator
                     HStack(spacing: 4) {
                         Image(systemName: book.isPublic ? "globe" : "lock")
                             .font(.caption)
@@ -38,7 +29,6 @@ struct RecipeBookCardView: View {
                             .foregroundColor(book.isPublic ? .green : .orange)
                     }
                     
-                    // Edit button
                     Button(action: {
                         showingEditSheet = true
                     }) {
@@ -49,7 +39,6 @@ struct RecipeBookCardView: View {
                     .buttonStyle(PlainButtonStyle())
                     .disabled(isDeleting)
                     
-                    // Delete button
                     Button(action: {
                         showingDeleteAlert = true
                     }) {
@@ -62,13 +51,11 @@ struct RecipeBookCardView: View {
                 }
             }
             
-            // Description
             Text(book.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
             
-            // Recipe count
             HStack(spacing: 4) {
                 Image(systemName: "doc.text")
                     .font(.caption)
@@ -79,7 +66,6 @@ struct RecipeBookCardView: View {
                     .foregroundColor(.secondary)
             }
             
-            // Recipe preview dots (if any recipes)
             if !book.recipeIds.isEmpty {
                 HStack(spacing: 4) {
                     ForEach(0..<min(3, book.recipeIds.count), id: \.self) { _ in
@@ -109,7 +95,7 @@ struct RecipeBookCardView: View {
                 deleteBook()
             }
         } message: {
-            Text("Are you sure you want to delete '\(book.name)'? This action cannot be undone.")
+            Text("Are you sure you want to delete '\(book.name)'?")
         }
         .overlay(
             Group {
@@ -130,15 +116,6 @@ struct RecipeBookCardView: View {
         
         viewModel.deleteBook(book) { success in
             isDeleting = false
-            if !success {
-                // Error is already handled in the view model
-                print("Failed to delete book")
-            }
         }
     }
 }
-
-#Preview {
-    RecipeBookCardView(book: RecipeBook.sample, viewModel: RecipeBooksViewModel())
-        .padding()
-} 

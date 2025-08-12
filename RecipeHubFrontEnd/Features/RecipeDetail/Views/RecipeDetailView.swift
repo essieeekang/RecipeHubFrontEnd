@@ -664,7 +664,3 @@ struct RecipeDetailView: View {
         }
     }
 }
-
-#Preview {
-    RecipeDetailView(viewModel: .init(recipe: .sample), onRecipeDeleted: nil)
-}

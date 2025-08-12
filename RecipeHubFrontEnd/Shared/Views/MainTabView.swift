@@ -1,10 +1,3 @@
-//
-//  MainTabView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct MainTabView: View {
@@ -42,9 +35,4 @@ struct MainTabView: View {
         .accentColor(.purple)
         .environmentObject(authViewModel)
     }
-}
-
-#Preview {
-    MainTabView()
-        .environmentObject(AuthViewModel())
 }

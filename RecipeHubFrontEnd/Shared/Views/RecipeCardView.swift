@@ -1,11 +1,3 @@
-//
-//  RecipeCardView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
-
 import SwiftUI
 
 struct RecipeCardView: View {
@@ -15,7 +7,6 @@ struct RecipeCardView: View {
     
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            // Recipe Image (if available)
             if let imageUrl = recipe.imageUrl, !imageUrl.isEmpty {
                 AsyncImage(url: URL(string: imageUrl)) { image in
                     image
@@ -35,7 +26,6 @@ struct RecipeCardView: View {
                 .cornerRadius(12)
             }
             
-            // Recipe Title and Fork Button
             HStack {
                 Text(recipe.title)
                     .font(.title3)
@@ -45,7 +35,6 @@ struct RecipeCardView: View {
                 
                 Spacer()
                 
-                // Fork button (only show if recipe is not by current user)
                 if let currentUserId = authViewModel.getCurrentUserId(), currentUserId != recipe.authorId {
                     Button(action: {
                         showingForkSheet = true
@@ -58,13 +47,11 @@ struct RecipeCardView: View {
                 }
             }
             
-            // Recipe Description
             Text(recipe.description)
                 .font(.subheadline)
                 .foregroundColor(.secondary)
                 .lineLimit(2)
             
-            // Recipe Info
             HStack(spacing: 4) {
                 Image(systemName: "doc.text")
                     .font(.caption)
@@ -81,7 +68,6 @@ struct RecipeCardView: View {
                         .font(.caption)
                         .foregroundColor(.secondary)
                     
-                    // Show forking information if this is a forked recipe
                     if let originalRecipeId = recipe.originalRecipeId {
                         Text("Forked from recipe #\(originalRecipeId)")
                             .font(.caption2)
@@ -104,7 +90,7 @@ struct RecipeCardView: View {
                         .font(.caption)
                 }
                 
-                if let originalRecipeId = recipe.originalRecipeId {
+                if recipe.originalRecipeId != nil {
                     HStack(spacing: 2) {
                         Image(systemName: "arrow.triangle.branch")
                             .foregroundColor(.purple)

@@ -1,10 +1,3 @@
-//
-//  SettingsView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct SettingsView: View {
@@ -46,7 +39,6 @@ struct SettingsView: View {
                                 .shadow(color: .black.opacity(0.05), radius: 2, x: 0, y: 1)
                             }
                         }
-                        // Account Actions Section
                         VStack(spacing: 16) {
                             Text("Account")
                                 .font(.title2)
