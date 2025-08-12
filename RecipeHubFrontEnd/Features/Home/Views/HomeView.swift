@@ -24,7 +24,7 @@ struct HomeView: View {
                     // Header
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("My Recipes")
+                            Text(viewModel.currentFilter == .all ? "My Recipes" : viewModel.currentFilter.rawValue)
                                 .font(.largeTitle)
                                 .fontWeight(.bold)
                                 .foregroundColor(.purple)
@@ -53,13 +53,50 @@ struct HomeView: View {
                         }
                     }
                     .padding(.horizontal)
+                    
+                    // Filter Buttons
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("Filter by:")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .padding(.horizontal)
+                        
+                        ScrollView(.horizontal, showsIndicators: false) {
+                            HStack(spacing: 12) {
+                                ForEach(RecipeFilter.allCases, id: \.self) { filter in
+                                    Button(action: {
+                                        viewModel.loadFilteredRecipes(userId: authViewModel.getCurrentUserId(), filter: filter)
+                                    }) {
+                                        HStack(spacing: 6) {
+                                            Image(systemName: filter.icon)
+                                                .font(.caption)
+                                            Text(filter.rawValue)
+                                                .font(.caption)
+                                                .fontWeight(.medium)
+                                        }
+                                        .padding(.horizontal, 12)
+                                        .padding(.vertical, 8)
+                                        .background(viewModel.currentFilter == filter ? Color.purple : Color.white)
+                                        .foregroundColor(viewModel.currentFilter == filter ? .white : .purple)
+                                        .cornerRadius(20)
+                                        .overlay(
+                                            RoundedRectangle(cornerRadius: 20)
+                                                .stroke(Color.purple, lineWidth: 1)
+                                        )
+                                    }
+                                    .buttonStyle(PlainButtonStyle())
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                    }
 
                     // Content
                     if viewModel.isLoading {
                         VStack(spacing: 16) {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .purple))
-                            Text("Loading your recipes...")
+                            Text("Loading \(viewModel.currentFilter.rawValue.lowercased()) recipes...")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                         }
@@ -89,8 +126,29 @@ struct HomeView: View {
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
                         // Recipe List
-                        ScrollView {
-                            LazyVStack(spacing: 16) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            // Filter Status
+                            if viewModel.currentFilter != .all {
+                                HStack {
+                                    Image(systemName: viewModel.currentFilter.icon)
+                                        .foregroundColor(.purple)
+                                    Text("Showing \(viewModel.currentFilter.rawValue.lowercased()) recipes (\(viewModel.recipes.count))")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Spacer()
+                                    
+                                    Button("Show All") {
+                                        viewModel.loadFilteredRecipes(userId: authViewModel.getCurrentUserId(), filter: .all)
+                                    }
+                                    .font(.caption)
+                                    .foregroundColor(.purple)
+                                }
+                                .padding(.horizontal)
+                            }
+                            
+                            ScrollView {
+                                LazyVStack(spacing: 16) {
                                 ForEach(viewModel.recipes) { recipe in
                                     NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
                                         RecipeCardView(recipe: recipe)
@@ -101,6 +159,7 @@ struct HomeView: View {
                             }
                             .padding(.vertical)
                         }
+                    }
                     }
                 }
                 .navigationBarHidden(true)

@@ -1,0 +1,77 @@
+import Foundation
+
+struct GetCookedRecipesAction {
+    let userId: Int
+    
+    func call(completion: @escaping ([Recipe]) -> Void) {
+        guard let url = URL(string: "http://192.168.0.166:8080/api/users/\(userId)/recipes/cooked") else {
+            print("Failed to create URL for cooked recipes")
+            completion([])
+            return
+        }
+        
+        print("Making request to: \(url)")
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        print("Starting network request for cooked recipes...")
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                print("Network error: \(error)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+                return
+            }
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                print("Invalid response type")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+                return
+            }
+            
+            print("Response status code: \(httpResponse.statusCode)")
+            
+            if httpResponse.statusCode != 200 {
+                print("Failed to fetch cooked recipes with status code: \(httpResponse.statusCode)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+                return
+            }
+            
+            guard let data = data else {
+                print("No data received")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+                return
+            }
+            
+            if let dataString = String(data: data, encoding: .utf8) {
+                print("Raw response data: \(dataString)")
+            }
+            
+            do {
+                let recipes = try JSONDecoder().decode([Recipe].self, from: data)
+                print("Successfully decoded \(recipes.count) cooked recipes")
+                DispatchQueue.main.async {
+                    completion(recipes)
+                }
+            } catch {
+                print("Decoding error: \(error)")
+                print("Error details: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion([])
+                }
+            }
+        }
+        
+        task.resume()
+    }
+} 
