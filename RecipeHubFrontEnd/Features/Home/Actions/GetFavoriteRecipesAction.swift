@@ -9,15 +9,11 @@ struct GetFavoriteRecipesAction {
             completion([])
             return
         }
-        
-        print("Making request to: \(url)")
-        
+                
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        print("Starting network request for favorite recipes...")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -34,9 +30,7 @@ struct GetFavoriteRecipesAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 200 {
                 print("Failed to fetch favorite recipes with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -53,13 +47,8 @@ struct GetFavoriteRecipesAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-            }
-            
             do {
                 let recipes = try JSONDecoder().decode([Recipe].self, from: data)
-                print("Successfully decoded \(recipes.count) favorite recipes")
                 DispatchQueue.main.async {
                     completion(recipes)
                 }

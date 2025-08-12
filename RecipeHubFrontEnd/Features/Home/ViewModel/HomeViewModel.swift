@@ -1,10 +1,3 @@
-//
-//  HomeViewModel.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 enum RecipeFilter: String, CaseIterable {
@@ -42,7 +35,6 @@ class HomeViewModel: ObservableObject {
     @Published var currentFilter: RecipeFilter = .all
     
     init() {
-        // Start with empty recipes - will be loaded when user logs in
         recipes = []
     }
     
@@ -55,9 +47,7 @@ class HomeViewModel: ObservableObject {
         
         isLoading = true
         errorMessage = ""
-        
-        print("Loading recipes for user ID: \(userId)")
-        
+                
         GetUserRecipesAction(userId: userId).call { [weak self] recipes in
             DispatchQueue.main.async {
                 self?.isLoading = false
@@ -68,7 +58,6 @@ class HomeViewModel: ObservableObject {
                 } else {
                     self?.recipes = recipes
                     self?.errorMessage = ""
-                    print("Loaded \(recipes.count) recipes for user \(userId)")
                 }
             }
         }
@@ -81,7 +70,6 @@ class HomeViewModel: ObservableObject {
     func addRecipe(_ recipe: Recipe) {
         DispatchQueue.main.async {
             self.recipes.append(recipe)
-            print("Added new recipe to list: \(recipe.title)")
         }
     }
     
@@ -107,9 +95,7 @@ class HomeViewModel: ObservableObject {
         currentFilter = filter
         isLoading = true
         errorMessage = ""
-        
-        print("Loading \(filter.rawValue) recipes for user ID: \(userId)")
-        
+                
         switch filter {
         case .all:
             loadUserRecipes(userId: userId)

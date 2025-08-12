@@ -1,12 +1,3 @@
-//
-//  HomeView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
-// Features/Home/Views/HomeView.swift
-
 import SwiftUI
 
 struct HomeView: View {
@@ -21,7 +12,6 @@ struct HomeView: View {
                     .edgesIgnoringSafeArea(.all)
 
                 VStack(alignment: .leading, spacing: 20) {
-                    // Header
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text(viewModel.currentFilter == .all ? "My Recipes" : viewModel.currentFilter.rawValue)
@@ -54,7 +44,6 @@ struct HomeView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Filter Buttons
                     VStack(alignment: .leading, spacing: 12) {
                         Text("Filter by:")
                             .font(.subheadline)
@@ -91,7 +80,6 @@ struct HomeView: View {
                         }
                     }
 
-                    // Content
                     if viewModel.isLoading {
                         VStack(spacing: 16) {
                             ProgressView()
@@ -125,9 +113,7 @@ struct HomeView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        // Recipe List
                         VStack(alignment: .leading, spacing: 12) {
-                            // Filter Status
                             if viewModel.currentFilter != .all {
                                 HStack {
                                     Image(systemName: viewModel.currentFilter.icon)
@@ -166,11 +152,9 @@ struct HomeView: View {
             }
         }
         .onAppear {
-            // Load user-specific recipes when view appears
             viewModel.loadUserRecipes(userId: authViewModel.getCurrentUserId())
         }
         .refreshable {
-            // Pull to refresh functionality
             viewModel.refreshRecipes(userId: authViewModel.getCurrentUserId())
         }
         .sheet(isPresented: $showingAddRecipe) {

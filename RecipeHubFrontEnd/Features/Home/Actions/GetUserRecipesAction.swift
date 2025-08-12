@@ -1,10 +1,3 @@
-//
-//  GetUserRecipesAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct GetUserRecipesAction {
@@ -16,15 +9,11 @@ struct GetUserRecipesAction {
             completion([])
             return
         }
-        
-        print("Making request to: \(url)")
-        
+                
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        print("Starting network request for user recipes...")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -41,9 +30,7 @@ struct GetUserRecipesAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 200 {
                 print("Failed to fetch recipes with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -60,13 +47,8 @@ struct GetUserRecipesAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-            }
-            
             do {
                 let recipes = try JSONDecoder().decode([Recipe].self, from: data)
-                print("Successfully decoded \(recipes.count) recipes")
                 DispatchQueue.main.async {
                     completion(recipes)
                 }
