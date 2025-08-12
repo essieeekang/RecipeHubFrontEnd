@@ -118,9 +118,6 @@ struct RecipeDetailView: View {
                                             HStack(spacing: 4) {
                                                 Image(systemName: "trash")
                                                     .foregroundColor(.red)
-                                                Text("Delete")
-                                                    .font(.caption)
-                                                    .foregroundColor(.red)
                                             }
                                             .padding(.horizontal, 12)
                                             .padding(.vertical, 6)
