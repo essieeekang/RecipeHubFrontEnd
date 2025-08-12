@@ -11,9 +11,7 @@ struct UpdateRecipeRequest: Codable {
     let cooked: Bool?
     let favourite: Bool?
     let likeCount: Int?
-    let tagNames: [String]? // replaces all existing tags
-    let tagsToAdd: [String]? // adds tags without affecting existing ones
-    let tagsToDelete: [String]? // removes specific tags
+
 }
 
 struct UpdateRecipeAction {

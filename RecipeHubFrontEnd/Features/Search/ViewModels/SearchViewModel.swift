@@ -11,9 +11,11 @@ import Combine
 class SearchViewModel: ObservableObject {
     @Published var searchText = ""
     @Published var searchResults: [Recipe] = []
+    @Published var recipeBookResults: [RecipeBook] = []
     @Published var isLoading = false
     @Published var errorMessage = ""
     @Published var hasSearched = false
+    @Published var searchType: SearchType = .recipeTitle
     
     private var searchCancellable: AnyCancellable?
     
@@ -39,19 +41,24 @@ class SearchViewModel: ObservableObject {
         errorMessage = ""
         hasSearched = true
         
-        print("Searching for recipes with term: '\(searchTerm)'")
+        print("Searching for recipes with term: '\(searchTerm)' by \(searchType.rawValue)")
         
-        SearchRecipesAction(searchTerm: searchTerm).call { [weak self] recipes in
+        SearchRecipesAction(searchTerm: searchTerm, searchType: searchType).call { [weak self] searchResponse in
             DispatchQueue.main.async {
                 self?.isLoading = false
                 
-                if recipes.isEmpty {
-                    self?.errorMessage = "No recipes found matching '\(searchTerm)'"
+                let recipes = searchResponse.recipes ?? []
+                let recipeBooks = searchResponse.recipeBooks ?? []
+                
+                if recipes.isEmpty && recipeBooks.isEmpty {
+                    self?.errorMessage = "No recipes or recipe books found matching '\(searchTerm)'"
                     self?.searchResults = []
+                    self?.recipeBookResults = []
                 } else {
                     self?.searchResults = recipes
+                    self?.recipeBookResults = recipeBooks
                     self?.errorMessage = ""
-                    print("Found \(recipes.count) recipes matching '\(searchTerm)'")
+                    print("Found \(recipes.count) recipes and \(recipeBooks.count) recipe books matching '\(searchTerm)' by \(self?.searchType.rawValue ?? "unknown")")
                 }
             }
         }
@@ -60,6 +67,7 @@ class SearchViewModel: ObservableObject {
     func clearSearch() {
         searchText = ""
         searchResults = []
+        recipeBookResults = []
         errorMessage = ""
         hasSearched = false
     }

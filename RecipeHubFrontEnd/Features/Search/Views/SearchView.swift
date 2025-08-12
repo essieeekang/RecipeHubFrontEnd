@@ -24,11 +24,32 @@ struct SearchView: View {
                             .fontWeight(.bold)
                             .foregroundColor(.purple)
                         
-                        Text("Find your favorite recipes")
+                        Text("Find recipes by \(viewModel.searchType.rawValue.lowercased())")
                             .font(.subheadline)
                             .foregroundColor(.gray)
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
+                    .padding(.horizontal)
+                    
+                    // Search Type Selector
+                    HStack {
+                        Text("Search by:")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                        
+                        Picker("Search Type", selection: $viewModel.searchType) {
+                            ForEach(SearchType.allCases, id: \.self) { searchType in
+                                Text(searchType.rawValue)
+                                    .tag(searchType)
+                            }
+                        }
+                        .pickerStyle(SegmentedPickerStyle())
+                        .onChange(of: viewModel.searchType) { _ in
+                            viewModel.clearSearch()
+                        }
+                        
+                        Spacer()
+                    }
                     .padding(.horizontal)
                     
                     // Search Bar
@@ -37,7 +58,7 @@ struct SearchView: View {
                             Image(systemName: "magnifyingglass")
                                 .foregroundColor(.gray)
                             
-                            TextField("Search recipes...", text: $viewModel.searchText)
+                            TextField(viewModel.searchType.placeholder, text: $viewModel.searchText)
                                 .textFieldStyle(PlainTextFieldStyle())
                                 .onSubmit {
                                     viewModel.searchOnSubmit()
@@ -78,7 +99,7 @@ struct SearchView: View {
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
                             
-                            Text("Try searching for different keywords")
+                            Text("Try searching for different terms")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
@@ -94,22 +115,70 @@ struct SearchView: View {
                                 .font(.headline)
                                 .foregroundColor(.gray)
                             
-                            Text("Enter keywords to find recipes")
+                            Text("Enter terms to find recipes")
                                 .font(.subheadline)
                                 .foregroundColor(.gray)
                                 .multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
+                        // Search Results Summary
+                        VStack(alignment: .leading, spacing: 8) {
+                            HStack {
+                                Text("Found \(viewModel.searchResults.count) recipe\(viewModel.searchResults.count == 1 ? "" : "s")")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                                
+                                if !viewModel.recipeBookResults.isEmpty {
+                                    Text("•")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                    
+                                    Text("\(viewModel.recipeBookResults.count) recipe book\(viewModel.recipeBookResults.count == 1 ? "" : "s")")
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                            }
+                            .padding(.horizontal)
+                        }
+                        
                         // Search Results List
                         ScrollView {
-                            LazyVStack(spacing: 16) {
-                                ForEach(viewModel.searchResults) { recipe in
-                                    NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
-                                        RecipeCardView(recipe: recipe)
+                            LazyVStack(spacing: 20) {
+                                // Recipes Section
+                                if !viewModel.searchResults.isEmpty {
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Text("Recipes")
+                                            .font(.headline)
+                                            .foregroundColor(.purple)
+                                            .padding(.horizontal)
+                                        
+                                        ForEach(viewModel.searchResults) { recipe in
+                                            NavigationLink(destination: RecipeDetailView(viewModel: RecipeDetailViewModel(recipe: recipe))) {
+                                                RecipeCardView(recipe: recipe)
+                                            }
+                                            .buttonStyle(PlainButtonStyle())
+                                            .padding(.horizontal)
+                                        }
                                     }
-                                    .buttonStyle(PlainButtonStyle())
-                                    .padding(.horizontal)
+                                }
+                                
+                                // Recipe Books Section
+                                if !viewModel.recipeBookResults.isEmpty {
+                                    VStack(alignment: .leading, spacing: 12) {
+                                        Divider()
+                                            .padding(.horizontal)
+                                        
+                                        Text("Recipe Books")
+                                            .font(.headline)
+                                            .foregroundColor(.purple)
+                                            .padding(.horizontal)
+                                        
+                                        ForEach(viewModel.recipeBookResults) { recipeBook in
+                                            SearchRecipeBookCardView(recipeBook: recipeBook)
+                                                .padding(.horizontal)
+                                        }
+                                    }
                                 }
                             }
                             .padding(.vertical)

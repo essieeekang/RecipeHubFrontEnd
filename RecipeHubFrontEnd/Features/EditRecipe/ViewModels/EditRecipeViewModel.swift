@@ -12,11 +12,7 @@ class EditRecipeViewModel: ObservableObject {
     @Published var isLoading = false
     @Published var errorMessage = ""
     
-    // Tag management
-    @Published var currentTags: [String] = []
-    @Published var newTag: String = ""
-    @Published var tagsToAdd: [String] = []
-    @Published var tagsToDelete: [String] = []
+
     
     let originalRecipe: Recipe
     let authorId: Int
@@ -35,7 +31,7 @@ class EditRecipeViewModel: ObservableObject {
         self.isPublic = recipe.isPublic
         self.cooked = recipe.cooked
         self.favourite = recipe.favourite
-        self.currentTags = recipe.tags ?? []
+
     }
     
     var canSubmit: Bool {
@@ -65,29 +61,7 @@ class EditRecipeViewModel: ObservableObject {
         instructions.remove(at: index)
     }
     
-    // MARK: - Tag Management
-    
-    func addNewTag() {
-        let trimmedTag = newTag.trimmingCharacters(in: .whitespacesAndNewlines)
-        if !trimmedTag.isEmpty && !currentTags.contains(trimmedTag) && !tagsToAdd.contains(trimmedTag) {
-            tagsToAdd.append(trimmedTag)
-            newTag = ""
-        }
-    }
-    
-    func removeTagToAdd(at index: Int) {
-        tagsToAdd.remove(at: index)
-    }
-    
-    func deleteTag(_ tag: String) {
-        if currentTags.contains(tag) && !tagsToDelete.contains(tag) {
-            tagsToDelete.append(tag)
-        }
-    }
-    
-    func undoTagDeletion(_ tag: String) {
-        tagsToDelete.removeAll { $0 == tag }
-    }
+
     
     // MARK: - Recipe Update
     
@@ -113,9 +87,7 @@ class EditRecipeViewModel: ObservableObject {
             cooked: cooked,
             favourite: favourite,
             likeCount: originalRecipe.likeCount,
-            tagNames: nil, // We'll use tagsToAdd and tagsToDelete instead
-            tagsToAdd: tagsToAdd.isEmpty ? nil : tagsToAdd,
-            tagsToDelete: tagsToDelete.isEmpty ? nil : tagsToDelete
+
         )
         
         UpdateRecipeAction(recipeId: originalRecipe.id, parameters: request).call { [weak self] updatedRecipe in

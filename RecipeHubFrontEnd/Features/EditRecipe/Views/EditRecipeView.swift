@@ -106,131 +106,7 @@ struct EditRecipeView: View {
                         }
                     }
                     
-                    // Tags Management
-                    VStack(alignment: .leading, spacing: 16) {
-                        Text("Tags")
-                            .font(.headline)
-                            .foregroundColor(.purple)
-                        
-                        // Current tags
-                        if !viewModel.currentTags.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Current Tags")
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                                
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                                    ForEach(viewModel.currentTags, id: \.self) { tag in
-                                        HStack {
-                                            Text(tag)
-                                                .font(.caption)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color.purple.opacity(0.1))
-                                                .cornerRadius(12)
-                                            
-                                            Spacer()
-                                            
-                                            if !viewModel.tagsToDelete.contains(tag) {
-                                                Button(action: {
-                                                    viewModel.deleteTag(tag)
-                                                }) {
-                                                    Image(systemName: "xmark.circle.fill")
-                                                        .foregroundColor(.red)
-                                                        .font(.caption)
-                                                }
-                                            } else {
-                                                Button(action: {
-                                                    viewModel.undoTagDeletion(tag)
-                                                }) {
-                                                    Image(systemName: "arrow.uturn.backward.circle.fill")
-                                                        .foregroundColor(.blue)
-                                                        .font(.caption)
-                                                }
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Tags to delete
-                        if !viewModel.tagsToDelete.isEmpty {
-                            VStack(alignment: .leading, spacing: 8) {
-                                Text("Tags to Remove")
-                                    .font(.subheadline)
-                                    .foregroundColor(.red)
-                                
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                                    ForEach(viewModel.tagsToDelete, id: \.self) { tag in
-                                        HStack {
-                                            Text(tag)
-                                                .font(.caption)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color.red.opacity(0.1))
-                                                .cornerRadius(12)
-                                            
-                                            Spacer()
-                                            
-                                            Button(action: {
-                                                viewModel.undoTagDeletion(tag)
-                                            }) {
-                                                Image(systemName: "arrow.uturn.backward.circle.fill")
-                                                    .foregroundColor(.blue)
-                                                    .font(.caption)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Add new tags
-                        VStack(alignment: .leading, spacing: 8) {
-                            Text("Add New Tags")
-                                .font(.subheadline)
-                                .foregroundColor(.gray)
-                            
-                            HStack {
-                                TextField("New tag", text: $viewModel.newTag)
-                                    .textFieldStyle(RoundedField())
-                                    .disabled(viewModel.isLoading)
-                                
-                                Button(action: viewModel.addNewTag) {
-                                    Image(systemName: "plus.circle.fill")
-                                        .foregroundColor(.purple)
-                                        .font(.title2)
-                                }
-                                .disabled(viewModel.newTag.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || viewModel.isLoading)
-                            }
-                            
-                            if !viewModel.tagsToAdd.isEmpty {
-                                LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 2), spacing: 8) {
-                                    ForEach(Array(viewModel.tagsToAdd.enumerated()), id: \.offset) { index, tag in
-                                        HStack {
-                                            Text(tag)
-                                                .font(.caption)
-                                                .padding(.horizontal, 8)
-                                                .padding(.vertical, 4)
-                                                .background(Color.green.opacity(0.1))
-                                                .cornerRadius(12)
-                                            
-                                            Spacer()
-                                            
-                                            Button(action: {
-                                                viewModel.removeTagToAdd(at: index)
-                                            }) {
-                                                Image(systemName: "xmark.circle.fill")
-                                                    .foregroundColor(.red)
-                                                    .font(.caption)
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+
                     
                     // Error message
                     if !viewModel.errorMessage.isEmpty {
@@ -304,7 +180,7 @@ struct EditRecipeView: View {
                     authorId: viewModel.authorId,
                     authorUsername: viewModel.originalRecipe.authorUsername,
                     originalRecipeId: viewModel.originalRecipe.originalRecipeId,
-                    tags: viewModel.currentTags.filter { !viewModel.tagsToDelete.contains($0) } + viewModel.tagsToAdd,
+                    tags: viewModel.originalRecipe.tags,
                     createdAt: viewModel.originalRecipe.createdAt,
                     updatedAt: Date()
                 )
