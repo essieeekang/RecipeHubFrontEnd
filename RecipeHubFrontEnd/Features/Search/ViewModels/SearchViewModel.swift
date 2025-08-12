@@ -1,10 +1,3 @@
-//
-//  SearchViewModel.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 import Combine
 
@@ -20,7 +13,6 @@ class SearchViewModel: ObservableObject {
     private var searchCancellable: AnyCancellable?
     
     init() {
-        // Debounce search to avoid too many API calls
         searchCancellable = $searchText
             .debounce(for: .milliseconds(500), scheduler: DispatchQueue.main)
             .removeDuplicates()
@@ -40,9 +32,7 @@ class SearchViewModel: ObservableObject {
         isLoading = true
         errorMessage = ""
         hasSearched = true
-        
-        print("Searching for recipes with term: '\(searchTerm)' by \(searchType.rawValue)")
-        
+                
         SearchRecipesAction(searchTerm: searchTerm, searchType: searchType).call { [weak self] searchResponse in
             DispatchQueue.main.async {
                 self?.isLoading = false
@@ -58,7 +48,6 @@ class SearchViewModel: ObservableObject {
                     self?.searchResults = recipes
                     self?.recipeBookResults = recipeBooks
                     self?.errorMessage = ""
-                    print("Found \(recipes.count) recipes and \(recipeBooks.count) recipe books matching '\(searchTerm)' by \(self?.searchType.rawValue ?? "unknown")")
                 }
             }
         }
@@ -73,7 +62,6 @@ class SearchViewModel: ObservableObject {
     }
     
     func searchOnSubmit() {
-        // Trigger search immediately when user submits
         performSearch(searchTerm: searchText)
     }
 } 

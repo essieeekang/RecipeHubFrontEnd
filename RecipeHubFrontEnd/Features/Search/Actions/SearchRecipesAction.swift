@@ -1,10 +1,3 @@
-//
-//  SearchRecipesAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct SearchRecipesAction {
@@ -20,15 +13,10 @@ struct SearchRecipesAction {
             return
         }
         
-        print("Making search request to: \(url)")
-        print("Search type: \(searchType.rawValue), endpoint: \(searchType.endpoint)")
-        
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
-        
-        print("Starting network request for recipe search...")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -47,9 +35,7 @@ struct SearchRecipesAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 200 {
                 print("Failed to search recipes with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -68,24 +54,8 @@ struct SearchRecipesAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-                print("Response length: \(dataString.count) characters")
-                
-                // Try to parse as JSON to see the structure
-                if let jsonData = dataString.data(using: .utf8),
-                   let json = try? JSONSerialization.jsonObject(with: jsonData),
-                   let prettyData = try? JSONSerialization.data(withJSONObject: json, options: .prettyPrinted),
-                   let prettyString = String(data: prettyData, encoding: .utf8) {
-                    print("Formatted JSON response:")
-                    print(prettyString)
-                }
-            }
-            
             do {
-                // Try to decode as an array first (direct response)
                 let recipes = try JSONDecoder().decode([Recipe].self, from: data)
-                print("Successfully decoded \(recipes.count) search results (direct array)")
                 let searchResponse = SearchResponse(authorId: nil, recipes: recipes, recipeBooks: [], totalRecipes: recipes.count, totalRecipeBooks: 0)
                 DispatchQueue.main.async {
                     completion(searchResponse)
@@ -93,11 +63,8 @@ struct SearchRecipesAction {
             } catch {
                 print("Failed to decode as array, trying wrapped response: \(error)")
                 
-                // Try to decode as a wrapped response
                 do {
                     let searchResponse = try JSONDecoder().decode(SearchResponse.self, from: data)
-                    print("Successfully decoded \(searchResponse.recipeResults.count) search results (wrapped response)")
-                    print("Response details: authorId=\(searchResponse.authorId ?? -1), totalRecipes=\(searchResponse.totalRecipes ?? 0)")
                     DispatchQueue.main.async {
                         completion(searchResponse)
                     }

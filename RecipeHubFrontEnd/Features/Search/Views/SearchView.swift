@@ -1,10 +1,3 @@
-//
-//  SearchView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct SearchView: View {
@@ -44,7 +37,7 @@ struct SearchView: View {
                             }
                         }
                         .pickerStyle(SegmentedPickerStyle())
-                        .onChange(of: viewModel.searchType) { _ in
+                        .onChange(of: viewModel.searchType) { oldValue, newValue in
                             viewModel.clearSearch()
                         }
                         
@@ -52,7 +45,6 @@ struct SearchView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Search Bar
                     HStack {
                         HStack {
                             Image(systemName: "magnifyingglass")
@@ -122,7 +114,6 @@ struct SearchView: View {
                         }
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                     } else {
-                        // Search Results Summary
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
                                 Text("Found \(viewModel.searchResults.count) recipe\(viewModel.searchResults.count == 1 ? "" : "s")")
@@ -142,7 +133,6 @@ struct SearchView: View {
                             .padding(.horizontal)
                         }
                         
-                        // Search Results List
                         ScrollView {
                             LazyVStack(spacing: 20) {
                                 // Recipes Section
@@ -163,7 +153,6 @@ struct SearchView: View {
                                     }
                                 }
                                 
-                                // Recipe Books Section
                                 if !viewModel.recipeBookResults.isEmpty {
                                     VStack(alignment: .leading, spacing: 12) {
                                         Divider()
@@ -191,8 +180,4 @@ struct SearchView: View {
             .navigationBarHidden(true)
         }
     }
-}
-
-#Preview {
-    SearchView()
 }

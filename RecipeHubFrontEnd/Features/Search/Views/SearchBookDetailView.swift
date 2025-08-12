@@ -13,7 +13,6 @@ struct SearchBookDetailView: View {
             
             ScrollView {
                 VStack(spacing: 20) {
-                    // Book Header
                     VStack(spacing: 12) {
                         HStack {
                             VStack(alignment: .leading, spacing: 4) {
@@ -124,7 +123,6 @@ struct SearchBookDetailView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(40)
                             } else {
-                                // Filter recipes to only show those in the book
                                 let bookRecipes = homeViewModel.recipes.filter { recipe in
                                     recipeBook.recipeIds.contains(recipe.id)
                                 }
@@ -167,8 +165,6 @@ struct SearchBookDetailView: View {
         .navigationTitle("Book Details")
         .navigationBarTitleDisplayMode(.inline)
         .onAppear {
-            // Load all user recipes to display the ones in this book
-            // For search results, we'll need to get the user ID from the recipe book
             homeViewModel.loadUserRecipes(userId: recipeBook.userId)
         }
     }
