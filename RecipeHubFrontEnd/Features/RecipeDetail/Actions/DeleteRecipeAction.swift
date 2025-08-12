@@ -1,10 +1,3 @@
-//
-//  DeleteRecipeAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct DeleteRecipeAction {
@@ -21,9 +14,7 @@ struct DeleteRecipeAction {
         
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
-        
-        print("Deleting recipe with ID: \(recipeId)")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -40,11 +31,8 @@ struct DeleteRecipeAction {
                 }
                 return
             }
-            
-            print("Delete recipe response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
-                print("Successfully deleted recipe with ID: \(recipeId)")
                 DispatchQueue.main.async {
                     completion(true)
                 }

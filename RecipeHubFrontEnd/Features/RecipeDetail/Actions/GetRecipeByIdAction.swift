@@ -13,9 +13,7 @@ struct GetRecipeByIdAction {
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
         request.setValue("application/json", forHTTPHeaderField: "Accept")
-        
-        print("Fetching recipe with ID: \(recipeId)")
-        
+                
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error fetching recipe by ID: \(error)")
@@ -24,13 +22,10 @@ struct GetRecipeByIdAction {
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("Get recipe by ID response status: \(httpResponse.statusCode)")
-                
                 if httpResponse.statusCode == 200 {
                     if let data = data {
                         do {
                             let recipe = try JSONDecoder().decode(Recipe.self, from: data)
-                            print("Successfully fetched recipe: \(recipe.title)")
                             completion(recipe)
                         } catch {
                             print("Failed to decode recipe response: \(error)")
