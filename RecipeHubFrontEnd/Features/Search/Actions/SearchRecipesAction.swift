@@ -13,7 +13,7 @@ struct SearchRecipesAction {
     
     func call(completion: @escaping (SearchResponse) -> Void) {
         guard let encodedSearchTerm = searchTerm.addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed),
-              let url = APIConfig.recipeSearchURL(searchType: searchType.endpoint, searchTerm: encodedSearchTerm) else {
+              let url = URL(string: "http://192.168.0.166:8080/api/recipes/search?\(searchType.endpoint)=\(encodedSearchTerm)") else {
             print("Failed to create URL for recipe search")
             let emptyResponse = SearchResponse(authorId: nil, recipes: [], recipeBooks: [], totalRecipes: 0, totalRecipeBooks: 0)
             completion(emptyResponse)

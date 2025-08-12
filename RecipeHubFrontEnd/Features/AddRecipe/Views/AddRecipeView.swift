@@ -13,7 +13,7 @@ struct AddRecipeView: View {
     @EnvironmentObject var authViewModel: AuthViewModel
     @Environment(\.dismiss) private var dismiss
     let onRecipeCreated: ((Recipe) -> Void)?
-    let recipeToFork: Recipe?
+    let recipeToFork: Recipe? // New parameter for forking
     
     @State private var selectedPhotoItem: PhotosPickerItem?
     
@@ -30,6 +30,7 @@ struct AddRecipeView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
+                        // Forking Header (if forking)
                         if viewModel.isForking, let originalRecipe = viewModel.originalRecipe {
                             VStack(spacing: 8) {
                                 HStack {
@@ -48,6 +49,12 @@ struct AddRecipeView: View {
                                     Text("Originally by: \(originalRecipe.authorUsername)")
                                         .font(.subheadline)
                                         .foregroundColor(.gray)
+                                    
+                                    if let currentUsername = authViewModel.getCurrentUsername() {
+                                        Text("You will be credited as the forker")
+                                            .font(.caption)
+                                            .foregroundColor(.purple)
+                                    }
                                 }
                             }
                             .padding()
@@ -55,6 +62,7 @@ struct AddRecipeView: View {
                             .cornerRadius(12)
                         }
                         
+                        // Recipe Title
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Recipe Title")
                                 .font(.headline)
@@ -77,6 +85,7 @@ struct AddRecipeView: View {
                                 .disabled(viewModel.isLoading)
                         }
                         
+                        // Recipe Image
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Recipe Image")
                                 .font(.headline)
@@ -123,6 +132,7 @@ struct AddRecipeView: View {
                             }
                         }
                         
+                        // Ingredients Section
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("Ingredients")
@@ -150,6 +160,7 @@ struct AddRecipeView: View {
                             }
                         }
                         
+                        // Instructions Section
                         VStack(alignment: .leading, spacing: 16) {
                             HStack {
                                 Text("Instructions")
@@ -178,6 +189,7 @@ struct AddRecipeView: View {
                             }
                         }
                         
+                        // Recipe Settings
                         VStack(alignment: .leading, spacing: 16) {
                             Text("Settings")
                                 .font(.headline)
@@ -201,6 +213,7 @@ struct AddRecipeView: View {
                             .cornerRadius(12)
                         }
                         
+                        // Error Message
                         if !viewModel.errorMessage.isEmpty {
                             Text(viewModel.errorMessage)
                                 .foregroundColor(.red)
@@ -210,6 +223,7 @@ struct AddRecipeView: View {
                                 .cornerRadius(8)
                         }
                         
+                        // Submit Button
                         Button(action: submitRecipe) {
                             HStack {
                                 if viewModel.isLoading {
@@ -244,7 +258,7 @@ struct AddRecipeView: View {
                 dismiss()
             }
         } message: {
-            Text(viewModel.isForking ? "Your forked recipe has been created and saved." : "Your recipe has been created and saved.")
+            Text(viewModel.isForking ? "Your forked recipe has been successfully created and saved." : "Your recipe has been successfully created and saved.")
         }
         .onAppear {
             if let recipe = recipeToFork, let currentUserId = authViewModel.getCurrentUserId() {

@@ -173,8 +173,3 @@ struct SearchBookDetailView: View {
         }
     }
 }
-
-#Preview {
-    SearchBookDetailView(recipeBook: RecipeBook.sample)
-        .environmentObject(AuthViewModel())
-} 

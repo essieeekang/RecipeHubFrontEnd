@@ -19,7 +19,7 @@ struct UpdateUserAction {
     let parameters: UpdateUserRequest
     
     func call(completion: @escaping (User?) -> Void) {
-        guard let url = APIConfig.userURL(userId: String(userId)) else {
+        guard let url = URL(string: "http://192.168.0.166:8080/api/users/\(userId)") else {
             print("Failed to create URL for updating user")
             DispatchQueue.main.async {
                 completion(nil)
