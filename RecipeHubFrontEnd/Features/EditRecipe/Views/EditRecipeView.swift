@@ -14,7 +14,6 @@ struct EditRecipeView: View {
         NavigationView {
             ScrollView {
                 VStack(spacing: 24) {
-                    // Title
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Title")
                             .font(.headline)
@@ -24,7 +23,6 @@ struct EditRecipeView: View {
                             .disabled(viewModel.isLoading)
                     }
                     
-                    // Description
                     VStack(alignment: .leading, spacing: 8) {
                         Text("Description")
                             .font(.headline)
@@ -35,7 +33,6 @@ struct EditRecipeView: View {
                             .disabled(viewModel.isLoading)
                     }
                     
-                    // Ingredients
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Ingredients")
@@ -61,7 +58,6 @@ struct EditRecipeView: View {
                         }
                     }
                     
-                    // Instructions
                     VStack(alignment: .leading, spacing: 12) {
                         HStack {
                             Text("Instructions")
@@ -88,7 +84,6 @@ struct EditRecipeView: View {
                         }
                     }
                     
-                    // Settings
                     VStack(alignment: .leading, spacing: 16) {
                         Text("Settings")
                             .font(.headline)
@@ -106,9 +101,6 @@ struct EditRecipeView: View {
                         }
                     }
                     
-
-                    
-                    // Error message
                     if !viewModel.errorMessage.isEmpty {
                         Text(viewModel.errorMessage)
                             .foregroundColor(.red)
@@ -118,8 +110,7 @@ struct EditRecipeView: View {
                             .background(Color.red.opacity(0.1))
                             .cornerRadius(8)
                     }
-                    
-                    // Update button
+
                     Button(action: updateRecipe) {
                         HStack {
                             if viewModel.isLoading {
@@ -158,8 +149,6 @@ struct EditRecipeView: View {
     private func updateRecipe() {
         viewModel.updateRecipe { success in
             if success {
-                // Create a mock updated recipe for the callback
-                // In a real app, you might want to fetch the updated recipe
                 let updatedRecipe = Recipe(
                     id: viewModel.originalRecipe.id,
                     title: viewModel.title,

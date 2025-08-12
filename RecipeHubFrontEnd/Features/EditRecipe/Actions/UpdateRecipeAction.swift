@@ -32,7 +32,6 @@ struct UpdateRecipeAction {
         do {
             let jsonData = try JSONEncoder().encode(parameters)
             request.httpBody = jsonData
-            print("Update recipe request body: \(String(data: jsonData, encoding: .utf8) ?? "")")
         } catch {
             print("Failed to encode update recipe request: \(error)")
             completion(nil)
@@ -47,13 +46,10 @@ struct UpdateRecipeAction {
             }
             
             if let httpResponse = response as? HTTPURLResponse {
-                print("Update recipe response status: \(httpResponse.statusCode)")
-                
                 if httpResponse.statusCode == 200 {
                     if let data = data {
                         do {
                             let updatedRecipe = try JSONDecoder().decode(Recipe.self, from: data)
-                            print("Successfully updated recipe: \(updatedRecipe.title)")
                             completion(updatedRecipe)
                         } catch {
                             print("Failed to decode updated recipe response: \(error)")

@@ -1,10 +1,3 @@
-//
-//  ForkRecipeAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct ForkRecipeRequest: Codable {
@@ -29,9 +22,7 @@ struct ForkRecipeAction {
             completion(nil)
             return
         }
-        
-        print("Making fork request to: \(url)")
-        
+                
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -40,17 +31,12 @@ struct ForkRecipeAction {
             let jsonData = try JSONEncoder().encode(parameters)
             request.httpBody = jsonData
             
-            if let bodyString = String(data: jsonData, encoding: .utf8) {
-                print("Request body: \(bodyString)")
-            }
         } catch {
             print("Encoding error: \(error)")
             completion(nil)
             return
         }
-        
-        print("Starting network request for forking recipe...")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -67,9 +53,7 @@ struct ForkRecipeAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 201 && httpResponse.statusCode != 200 {
                 print("Failed to fork recipe with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -86,14 +70,8 @@ struct ForkRecipeAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-            }
-            
             do {
                 let forkedRecipe = try JSONDecoder().decode(Recipe.self, from: data)
-                print("Successfully forked recipe with ID: \(forkedRecipe.id)")
-                print("Original recipe ID: \(forkedRecipe.originalRecipeId?.description ?? "nil")")
                 DispatchQueue.main.async {
                     completion(forkedRecipe)
                 }
@@ -108,4 +86,4 @@ struct ForkRecipeAction {
         
         task.resume()
     }
-} 
+}

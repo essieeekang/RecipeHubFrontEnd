@@ -21,7 +21,6 @@ class EditRecipeViewModel: ObservableObject {
         self.originalRecipe = recipe
         self.authorId = authorId
         
-        // Populate form with existing recipe data
         self.title = recipe.title
         self.description = recipe.description
         self.ingredients = recipe.ingredients.map { ingredient in
@@ -40,9 +39,7 @@ class EditRecipeViewModel: ObservableObject {
         !instructions.isEmpty &&
         !isLoading
     }
-    
-    // MARK: - Ingredients Management
-    
+        
     func addIngredient() {
         ingredients.append(IngredientInput())
     }
@@ -50,9 +47,7 @@ class EditRecipeViewModel: ObservableObject {
     func removeIngredient(at index: Int) {
         ingredients.remove(at: index)
     }
-    
-    // MARK: - Instructions Management
-    
+        
     func addInstruction() {
         instructions.append("")
     }
@@ -60,10 +55,6 @@ class EditRecipeViewModel: ObservableObject {
     func removeInstruction(at index: Int) {
         instructions.remove(at: index)
     }
-    
-
-    
-    // MARK: - Recipe Update
     
     func updateRecipe(completion: @escaping (Bool) -> Void) {
         isLoading = true
@@ -94,7 +85,6 @@ class EditRecipeViewModel: ObservableObject {
             DispatchQueue.main.async {
                 self?.isLoading = false
                 if let recipe = updatedRecipe {
-                    print("Recipe updated successfully: \(recipe.title)")
                     completion(true)
                 } else {
                     self?.errorMessage = "Failed to update recipe. Please try again."
