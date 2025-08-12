@@ -114,7 +114,7 @@ extension APIConfig {
         }
     }
     
-    static var currentEnvironment: Environment = .development
+    static var currentEnvironment: Environment = .production
     
     static var environmentBaseURL: String {
         return currentEnvironment.baseURL

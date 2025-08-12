@@ -37,9 +37,6 @@ struct LoginView: View {
                     }
                 
                 Button("Log In") {
-                    print("Login button tapped")
-                    print("Username: \(authViewModel.username)")
-                    print("Password: \(authViewModel.password)")
                     authViewModel.login()
                 }
                 .buttonStyle(FilledButtonStyle())
