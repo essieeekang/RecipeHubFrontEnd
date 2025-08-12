@@ -1,10 +1,3 @@
-//
-//  DeleteRecipeBookAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct DeleteRecipeBookAction {
@@ -21,9 +14,7 @@ struct DeleteRecipeBookAction {
         
         var request = URLRequest(url: url)
         request.httpMethod = "DELETE"
-        
-        print("Deleting recipe book with ID: \(bookId)")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -44,7 +35,6 @@ struct DeleteRecipeBookAction {
             print("Delete response status code: \(httpResponse.statusCode)")
             
             if httpResponse.statusCode == 200 || httpResponse.statusCode == 204 {
-                print("Successfully deleted recipe book with ID: \(bookId)")
                 DispatchQueue.main.async {
                     completion(true)
                 }

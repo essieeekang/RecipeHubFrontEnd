@@ -1,10 +1,3 @@
-//
-//  EditBookView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct EditBookView: View {
@@ -38,7 +31,6 @@ struct EditBookView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Book Name
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Book Name")
                                 .font(.headline)
@@ -49,7 +41,6 @@ struct EditBookView: View {
                                 .disabled(isLoading)
                         }
                         
-                        // Book Description
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
                                 .font(.headline)
@@ -61,7 +52,6 @@ struct EditBookView: View {
                                 .disabled(isLoading)
                         }
                         
-                        // Privacy Setting
                         VStack(alignment: .leading, spacing: 12) {
                             Text("Privacy")
                                 .font(.headline)
@@ -81,7 +71,6 @@ struct EditBookView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Current Recipe Count
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Recipes in Book")
                                 .font(.headline)
@@ -100,7 +89,6 @@ struct EditBookView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Error Message
                         if !errorMessage.isEmpty {
                             Text(errorMessage)
                                 .foregroundColor(.red)
@@ -110,7 +98,6 @@ struct EditBookView: View {
                                 .cornerRadius(8)
                         }
                         
-                        // Update Button
                         Button(action: updateBook) {
                             HStack {
                                 if isLoading {

@@ -1,10 +1,3 @@
-//
-//  BooksListView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct RecipeBooksView: View {
@@ -19,7 +12,6 @@ struct RecipeBooksView: View {
                     .ignoresSafeArea()
                 
                 VStack(spacing: 20) {
-                    // Header
                     HStack {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("My Books")
@@ -42,7 +34,6 @@ struct RecipeBooksView: View {
                     }
                     .padding(.horizontal)
                     
-                    // Content
                     if viewModel.isLoading {
                         VStack(spacing: 16) {
                             ProgressView()
@@ -102,7 +93,6 @@ struct RecipeBooksView: View {
             CreateBookView(viewModel: viewModel)
         }
         .onAppear {
-            // Load user's books when view appears
             viewModel.loadUserBooks(userId: authViewModel.getCurrentUserId())
         }
         .onChange(of: viewModel.books.count) { _, newCount in
@@ -110,7 +100,6 @@ struct RecipeBooksView: View {
             print("Current books: \(viewModel.books.map { "\($0.name) (ID: \($0.id))" })")
         }
         .refreshable {
-            // Pull to refresh functionality
             viewModel.refreshBooks(userId: authViewModel.getCurrentUserId())
         }
     }
@@ -124,8 +113,4 @@ struct RecipeBooksView: View {
             }
         }
     }
-}
-
-#Preview {
-    RecipeBooksView()
 }

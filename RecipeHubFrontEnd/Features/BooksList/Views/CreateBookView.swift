@@ -1,10 +1,3 @@
-//
-//  CreateBookView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct CreateBookView: View {
@@ -30,7 +23,6 @@ struct CreateBookView: View {
                 
                 ScrollView {
                     VStack(spacing: 24) {
-                        // Book Name
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Book Name")
                                 .font(.headline)
@@ -41,7 +33,6 @@ struct CreateBookView: View {
                                 .disabled(isLoading)
                         }
                         
-                        // Book Description
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Description")
                                 .font(.headline)
@@ -53,7 +44,6 @@ struct CreateBookView: View {
                                 .disabled(isLoading)
                         }
                         
-                        // Privacy Setting
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Privacy")
                                 .font(.headline)
@@ -75,7 +65,6 @@ struct CreateBookView: View {
                             .cornerRadius(12)
                         }
                         
-                        // Error Message
                         if !errorMessage.isEmpty {
                             Text(errorMessage)
                                 .foregroundColor(.red)
@@ -85,7 +74,6 @@ struct CreateBookView: View {
                                 .cornerRadius(8)
                         }
                         
-                        // Create Book Button
                         Button(action: createBook) {
                             HStack {
                                 if isLoading {
@@ -148,8 +136,6 @@ struct CreateBookView: View {
                 isLoading = false
                 
                 if success {
-                    print("CreateBookView: Book created successfully, dismissing in 0.5 seconds")
-                    // Add a small delay to ensure the UI updates are processed
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         dismiss()
                     }
@@ -160,7 +146,3 @@ struct CreateBookView: View {
         }
     }
 }
-
-#Preview {
-    CreateBookView(viewModel: RecipeBooksViewModel())
-} 

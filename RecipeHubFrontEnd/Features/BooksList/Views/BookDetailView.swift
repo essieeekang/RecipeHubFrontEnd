@@ -1,10 +1,3 @@
-//
-//  BookDetailView.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import SwiftUI
 
 struct BookDetailView: View {
@@ -37,7 +30,6 @@ struct BookDetailView: View {
                             
                             Spacer()
                             
-                            // Privacy indicator
                             HStack(spacing: 4) {
                                 Image(systemName: book.isPublic ? "globe" : "lock")
                                     .foregroundColor(book.isPublic ? .green : .orange)
@@ -138,7 +130,6 @@ struct BookDetailView: View {
                                 .frame(maxWidth: .infinity)
                                 .padding(40)
                             } else {
-                                // Filter recipes to only show those in the book
                                 let bookRecipes = homeViewModel.recipes.filter { recipe in
                                     book.recipeIds.contains(recipe.id)
                                 }
@@ -184,7 +175,6 @@ struct BookDetailView: View {
             AddRecipeToBookView(book: book, viewModel: viewModel)
         }
         .onAppear {
-            // Load all user recipes to display the ones in this book
             homeViewModel.loadUserRecipes(userId: authViewModel.getCurrentUserId())
         }
     }

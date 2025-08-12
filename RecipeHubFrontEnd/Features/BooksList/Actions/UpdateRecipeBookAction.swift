@@ -1,10 +1,3 @@
-//
-//  UpdateRecipeBookAction.swift
-//  RecipeHubFrontEnd
-//
-//  Created by Esther Kang on 7/31/25.
-//
-
 import Foundation
 
 struct UpdateRecipeBookRequest: Codable {
@@ -24,9 +17,7 @@ struct UpdateRecipeBookAction {
             completion(nil)
             return
         }
-        
-        print("Making PUT request to: \(url)")
-        
+                
         var request = URLRequest(url: url)
         request.httpMethod = "PUT"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
@@ -43,9 +34,7 @@ struct UpdateRecipeBookAction {
             completion(nil)
             return
         }
-        
-        print("Starting network request for updating recipe book...")
-        
+                
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
                 print("Network error: \(error)")
@@ -62,9 +51,7 @@ struct UpdateRecipeBookAction {
                 }
                 return
             }
-            
-            print("Response status code: \(httpResponse.statusCode)")
-            
+                        
             if httpResponse.statusCode != 200 {
                 print("Failed to update recipe book with status code: \(httpResponse.statusCode)")
                 DispatchQueue.main.async {
@@ -81,14 +68,8 @@ struct UpdateRecipeBookAction {
                 return
             }
             
-            if let dataString = String(data: data, encoding: .utf8) {
-                print("Raw response data: \(dataString)")
-            }
-            
             do {
                 let recipeBook = try JSONDecoder().decode(RecipeBook.self, from: data)
-                print("Successfully updated recipe book with ID: \(recipeBook.id)")
-                print("Updated recipe book: \(recipeBook.name) with \(recipeBook.recipeIds.count) recipes")
                 DispatchQueue.main.async {
                     completion(recipeBook)
                 }
